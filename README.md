@@ -17,7 +17,7 @@ Petite app Mac, dans la barre de menus, qui corrige, rend professionnel ou réé
 
 Télécharge [AutoCorrection.dmg](https://github.com/mdany75/AutoCorrection/releases/latest/download/AutoCorrection.dmg) (toujours la dernière version), ouvre-le, puis glisse AutoCorrection dans Applications.
 
-Configuration requise : macOS 14 ou plus et soit une clé API Anthropic, soit Claude Code installé et connecté (`claude auth login` dans le Terminal). Le moteur se choisit dans les réglages. Au premier lancement, accorder l'autorisation Accessibilité (Réglages Système > Confidentialité et sécurité) pour que l'app puisse copier et coller le texte, puis saisir la clé dans les réglages.
+Configuration requise : macOS 14 ou plus et soit une clé API Anthropic, soit Claude Code installé et connecté (bouton « Se connecter » dans les réglages, ou `claude auth login` dans le Terminal). Le moteur se choisit dans les réglages. Au premier lancement, accorder l'autorisation Accessibilité (Réglages Système > Confidentialité et sécurité) pour que l'app puisse copier et coller le texte, puis saisir la clé dans les réglages.
 
 ## Reconstruire
 

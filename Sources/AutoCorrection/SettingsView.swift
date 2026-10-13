@@ -5,6 +5,19 @@ final class SettingsState: ObservableObject {
     @Published var apiKey = ""
     @Published var saved = Keychain.read()?.isEmpty == false
     @Published var trusted = Clipboard.isTrusted
+    @Published var loggedIn: Bool?
+    @Published var loginBusy = false
+    @Published var loginError: String?
+
+    func refreshLogin() async { loggedIn = await ClaudeCodeClient.isLoggedIn() }
+
+    func login() async {
+        loginBusy = true
+        loginError = nil
+        do { try await ClaudeCodeClient.login() } catch { loginError = error.localizedDescription }
+        await refreshLogin()
+        loginBusy = false
+    }
 }
 
 struct SettingsView: View {
@@ -34,12 +47,25 @@ struct SettingsView: View {
                         }
                     }
                 } else {
+                    let found = ClaudeCodeClient.locate() != nil
                     HStack {
-                        Image(systemName: ClaudeCodeClient.locate() != nil ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                            .foregroundStyle(ClaudeCodeClient.locate() != nil ? .green : .orange)
-                        Text(ClaudeCodeClient.locate() != nil
-                             ? "Claude Code trouvé. S'il n'est pas connecté : claude auth login (Terminal)."
-                             : "Claude Code est introuvable sur ce Mac.")
+                        Image(systemName: found && state.loggedIn == true ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                            .foregroundStyle(found && state.loggedIn == true ? .green : .orange)
+                        Text(!found ? "Claude Code est introuvable sur ce Mac."
+                             : state.loggedIn == true ? "Claude Code est connecté."
+                             : state.loggedIn == false ? "Claude Code n'est pas connecté."
+                             : "État de Claude Code inconnu.")
+                        Spacer()
+                        if found {
+                            Button(state.loggedIn == true ? "Se reconnecter" : "Se connecter") { Task { await state.login() } }
+                                .disabled(state.loginBusy)
+                        }
+                    }
+                    if state.loginBusy {
+                        Text("Terminez la connexion dans votre navigateur…").font(.footnote).foregroundStyle(.secondary)
+                    }
+                    if let e = state.loginError {
+                        Text(e).font(.footnote).foregroundStyle(.red)
                     }
                 }
                 Picker("Modèle", selection: modelChoice) {
@@ -73,6 +99,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .task(id: backend) { if backend == "claudeCode" { await state.refreshLogin() } }
         .frame(width: 460)
         .fixedSize(horizontal: false, vertical: true)
         .onReceive(Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()) { _ in

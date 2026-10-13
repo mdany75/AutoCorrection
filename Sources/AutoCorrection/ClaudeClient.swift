@@ -72,31 +72,7 @@ enum ClaudeCodeClient {
                     "--no-session-persistence", "--disable-slash-commands",
                     "--setting-sources", "", "--strict-mcp-config"]
         let input = "<texte>\n\(text)\n</texte>"
-
-        let (status, out, err) = try await withCheckedThrowingContinuation {
-            (cont: CheckedContinuation<(Int32, String, String), Error>) in
-            let p = Process()
-            p.executableURL = URL(fileURLWithPath: exe)
-            p.arguments = args
-            p.currentDirectoryURL = FileManager.default.temporaryDirectory
-            let stdin = Pipe(), stdout = Pipe(), stderr = Pipe()
-            p.standardInput = stdin
-            p.standardOutput = stdout
-            p.standardError = stderr
-            p.terminationHandler = { proc in
-                let o = String(data: stdout.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-                let e = String(data: stderr.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-                cont.resume(returning: (proc.terminationStatus, o, e))
-            }
-            do {
-                try p.run()
-                stdin.fileHandleForWriting.write(Data(input.utf8))
-                try? stdin.fileHandleForWriting.close()
-                DispatchQueue.global().asyncAfter(deadline: .now() + 90) { if p.isRunning { p.terminate() } }
-            } catch {
-                cont.resume(throwing: error)
-            }
-        }
+        let (status, out, err) = try await execute(exe, args, input: input, timeout: 90)
 
         let result = out.trimmingCharacters(in: .whitespacesAndNewlines)
         guard status == 0, !result.isEmpty else {
@@ -107,5 +83,53 @@ enum ClaudeCodeClient {
             throw status == 0 ? ClaudeError.empty : ClaudeError.claudeCode("Claude Code a échoué : \(detail.prefix(200))")
         }
         return result
+    }
+
+    /// Lance `claude` avec ces arguments (dossier temporaire comme répertoire de travail), renvoie code, sortie et erreurs.
+    private static func execute(_ exe: String, _ args: [String], input: String?, timeout: TimeInterval) async throws -> (Int32, String, String) {
+        try await withCheckedThrowingContinuation { (cont: CheckedContinuation<(Int32, String, String), Error>) in
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: exe)
+            p.arguments = args
+            p.currentDirectoryURL = FileManager.default.temporaryDirectory
+            let stdin = Pipe(), stdout = Pipe(), stderr = Pipe()
+            p.standardInput = input == nil ? FileHandle.nullDevice : stdin
+            p.standardOutput = stdout
+            p.standardError = stderr
+            p.terminationHandler = { proc in
+                let o = String(data: stdout.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+                let e = String(data: stderr.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+                cont.resume(returning: (proc.terminationStatus, o, e))
+            }
+            do {
+                try p.run()
+                if let input {
+                    stdin.fileHandleForWriting.write(Data(input.utf8))
+                    try? stdin.fileHandleForWriting.close()
+                }
+                DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { if p.isRunning { p.terminate() } }
+            } catch {
+                cont.resume(throwing: error)
+            }
+        }
+    }
+
+    /// nil si l'état est indéterminé (Claude Code introuvable ou réponse illisible).
+    static func isLoggedIn() async -> Bool? {
+        guard let exe = locate(),
+              let (_, out, _) = try? await execute(exe, ["auth", "status"], input: nil, timeout: 20),
+              let json = try? JSONSerialization.jsonObject(with: Data(out.utf8)) as? [String: Any]
+        else { return nil }
+        return json["loggedIn"] as? Bool
+    }
+
+    /// Ouvre le navigateur pour connecter Claude Code au compte (équivaut à `claude auth login`).
+    static func login() async throws {
+        guard let exe = locate() else { throw ClaudeError.noClaudeCode }
+        let (status, out, err) = try await execute(exe, ["auth", "login"], input: nil, timeout: 300)
+        guard status == 0 else {
+            let detail = (err.isEmpty ? out : err).trimmingCharacters(in: .whitespacesAndNewlines)
+            throw ClaudeError.claudeCode("Connexion impossible : \(detail.prefix(200))")
+        }
     }
 }

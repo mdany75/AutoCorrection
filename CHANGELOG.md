@@ -1,5 +1,9 @@
 # Changements
 
+## 1.6 — 2026-10-13
+### Ajouté
+- Réglages, moteur Claude Code : indicateur « connecté / non connecté » et bouton « Se connecter » (équivalent de `claude auth login`) qui ouvre le navigateur pour relier Claude Code au compte.
+
 ## 1.5 — 2026-10-13
 ### Modifié
 - « Corriger et embellir » devient « Corriger et rendre professionnel » : corrige puis reformule dans un ton professionnel, clair et direct.
