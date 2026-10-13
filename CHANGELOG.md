@@ -1,5 +1,10 @@
 # Changements
 
+## 1.9.1 — 2026-10-13
+### Modifié
+- Palette : les gros carrés sont blancs et passent à un bleu plus foncé au survol de la souris (le bouton principal reste bleu).
+- La palette se déplace en la saisissant par son fond.
+
 ## 1.9 — 2026-10-13
 ### Ajouté
 - Palette refaite en verre (Liquid Glass sur macOS 26, flou teinté avant) : quatre gros carrés (Dicter, Corriger, Pro, Courriel) avec leur raccourci. Sombre en mode sombre, son négatif en mode clair ; le bouton principal reste bleu.

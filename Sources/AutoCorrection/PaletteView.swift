@@ -208,7 +208,7 @@ private struct GlassPanel: ViewModifier {
     }
 }
 
-/// Gros carré : voile clair en mode sombre, voile sombre en mode clair ; le bouton principal reste bleu.
+/// Gros carré blanc ; bleu plus foncé au survol. Le bouton principal reste bleu (plus foncé au survol).
 private struct TileStyle: ButtonStyle {
     let prominent: Bool
 
@@ -219,22 +219,25 @@ private struct TileStyle: ButtonStyle {
     private struct TileBody: View {
         let configuration: Configuration
         let prominent: Bool
-        @Environment(\.colorScheme) private var scheme
         @Environment(\.isEnabled) private var enabled
+        @State private var hovering = false
 
         var body: some View {
             let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
-            let dark = scheme == .dark
-            let fill: Color = prominent ? Color(red: 0.24, green: 0.55, blue: 1).opacity(0.5)
-                : dark ? .white.opacity(0.1) : Color(red: 0.08, green: 0.09, blue: 0.12).opacity(0.07)
-            let stroke: Color = prominent ? Color(red: 0.47, green: 0.69, blue: 1).opacity(0.75)
-                : dark ? .white.opacity(0.2) : Color(red: 0.08, green: 0.09, blue: 0.12).opacity(0.14)
+            let hot = hovering && enabled
+            let fill: Color = hot ? Color(red: 0.08, green: 0.36, blue: 0.86)
+                : prominent ? Color(red: 0.24, green: 0.55, blue: 1).opacity(0.8)
+                : Color.white.opacity(0.92)
+            let stroke: Color = hot || prominent ? Color(red: 0.47, green: 0.69, blue: 1).opacity(0.75)
+                : Color.black.opacity(0.1)
             configuration.label
-                .foregroundStyle(prominent ? AnyShapeStyle(Color.white) : AnyShapeStyle(.primary))
+                .foregroundStyle(hot || prominent ? Color.white : Color(red: 0.08, green: 0.09, blue: 0.12))
                 .background(fill, in: shape)
                 .overlay(shape.strokeBorder(stroke))
                 .opacity(enabled ? 1 : 0.5)
                 .scaleEffect(configuration.isPressed ? 0.97 : 1)
+                .animation(.easeOut(duration: 0.12), value: hot)
+                .onHover { hovering = $0 }
         }
     }
 }
