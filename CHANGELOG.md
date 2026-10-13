@@ -1,5 +1,12 @@
 # Changements
 
+## 1.3 — 2026-10-13
+### Ajouté
+- Moteur « Claude Code » : les textes peuvent être traités par la commande `claude` du Mac, avec le forfait du compte connecté (Max), sans clé API. Choix du moteur dans les réglages.
+
+### Retiré
+- La mise à jour automatique par GitHub (introduite en 1.1).
+
 ## 1.2 — 2026-10-13
 ### Modifié
 - Modèle par défaut : Claude Haiku 5.5 avec un effort de réflexion faible. Une correction coûte environ 0,02 ¢ US et répond plus vite. Le champ « Modèle » des réglages permet de revenir à un modèle plus puissant.

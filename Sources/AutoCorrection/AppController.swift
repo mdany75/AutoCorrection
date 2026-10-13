@@ -11,7 +11,6 @@ final class PalettePanel: NSPanel {
 @MainActor
 final class AppController: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
-    private var updateItem: NSMenuItem!
     private var panel: PalettePanel!
     private var hotKey: HotKey?
     private var settingsWindow: NSWindow?
@@ -30,10 +29,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         }
 
         if !Clipboard.isTrusted { Clipboard.promptForAccess() }
-        if Keychain.read()?.isEmpty != false { openSettings() }
-
-        Updater.shared.onState = { [weak self] _ in self?.refreshUpdateUI() }
-        Updater.shared.startAutoChecks()
+        if !Prefs.usesClaudeCode, Keychain.read()?.isEmpty != false { openSettings() }
     }
 
     /// Remplace le raccourci actif. En cas d'échec, l'ancien reste en place.
@@ -65,8 +61,6 @@ final class AppController: NSObject, NSApplicationDelegate {
         menu.addItem(withTitle: "Ouvrir la palette", action: #selector(menuOpenPalette), keyEquivalent: "").target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: "Réglages…", action: #selector(menuSettings), keyEquivalent: ",").target = self
-        updateItem = menu.addItem(withTitle: "Rechercher les mises à jour…", action: #selector(menuUpdate), keyEquivalent: "")
-        updateItem.target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quitter AutoCorrection", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         statusItem.menu = menu
@@ -108,69 +102,6 @@ final class AppController: NSObject, NSApplicationDelegate {
 
     @objc private func menuOpenPalette() { Task { await togglePalette() } }
     @objc private func menuSettings() { openSettings() }
-
-    // MARK: - Mises à jour
-
-    @objc private func menuUpdate() {
-        Task { @MainActor in
-            let updater = Updater.shared
-            if case .available(let release) = updater.state {
-                await promptInstall(release)
-                return
-            }
-            await updater.check()
-            switch updater.state {
-            case .available(let release): await promptInstall(release)
-            case .upToDate: alert("AutoCorrection est à jour", "Version \(Updater.currentVersion).")
-            case .error(let msg): alert("Vérification impossible", msg, settings: true)
-            default: break
-            }
-        }
-    }
-
-    private func promptInstall(_ release: ReleaseInfo) async {
-        let notes = release.notes.trimmingCharacters(in: .whitespacesAndNewlines)
-        let a = NSAlert()
-        a.messageText = "La version \(release.version) est disponible"
-        a.informativeText = "Vous utilisez la version \(Updater.currentVersion). L'app se fermera et se relancera après l'installation."
-            + (notes.isEmpty ? "" : "\n\n" + String(notes.prefix(600)))
-        a.addButton(withTitle: "Installer")
-        a.addButton(withTitle: "Plus tard")
-        NSApp.activate(ignoringOtherApps: true)
-        guard a.runModal() == .alertFirstButtonReturn else { return }
-        await Updater.shared.install()
-        if case .error(let msg) = Updater.shared.state { alert("Mise à jour impossible", msg) }
-    }
-
-    private func alert(_ title: String, _ text: String, settings: Bool = false) {
-        let a = NSAlert()
-        a.messageText = title
-        a.informativeText = text
-        a.addButton(withTitle: "OK")
-        if settings { a.addButton(withTitle: "Réglages") }
-        NSApp.activate(ignoringOtherApps: true)
-        if a.runModal() == .alertSecondButtonReturn { openSettings() }
-    }
-
-    private func refreshUpdateUI() {
-        let symbol = "wand.and.stars"
-        switch Updater.shared.state {
-        case .available(let r):
-            updateItem.title = "Installer la version \(r.version)…"
-            updateItem.isEnabled = true
-            statusItem.button?.image = NSImage(systemSymbolName: "arrow.down.circle.fill", accessibilityDescription: "Mise à jour disponible")
-        case .checking:
-            updateItem.title = "Vérification en cours…"; updateItem.isEnabled = false
-        case .downloading:
-            updateItem.title = "Téléchargement de la mise à jour…"; updateItem.isEnabled = false
-        case .installing:
-            updateItem.title = "Installation en cours…"; updateItem.isEnabled = false
-        default:
-            updateItem.title = "Rechercher les mises à jour…"
-            updateItem.isEnabled = true
-            statusItem.button?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: "AutoCorrection")
-        }
-    }
 
     private func openSettings() {
         if settingsWindow == nil {

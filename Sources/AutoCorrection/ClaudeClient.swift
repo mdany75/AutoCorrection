@@ -4,18 +4,23 @@ enum ClaudeError: LocalizedError {
     case noKey
     case api(Int, String)
     case empty
+    case noClaudeCode
+    case claudeCode(String)
 
     var errorDescription: String? {
         switch self {
         case .noKey: "Ajoutez votre clé API dans les réglages."
         case .api(let code, let msg): "Erreur \(code) : \(msg)"
         case .empty: "Claude n'a renvoyé aucun texte."
+        case .noClaudeCode: "Claude Code est introuvable. Installez-le, ou choisissez la clé API dans les réglages."
+        case .claudeCode(let msg): msg
         }
     }
 }
 
 enum ClaudeClient {
     static func run(_ action: TextAction, on text: String) async throws -> String {
+        if Prefs.usesClaudeCode { return try await ClaudeCodeClient.run(action, on: text) }
         guard let key = Keychain.read(), !key.isEmpty else { throw ClaudeError.noKey }
 
         var req = URLRequest(url: URL(string: "https://api.anthropic.com/v1/messages")!)
@@ -47,5 +52,60 @@ enum ClaudeClient {
             .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !out.isEmpty else { throw ClaudeError.empty }
         return out
+    }
+}
+
+/// Passe par la commande `claude` de Claude Code : le texte est traité avec le forfait du compte connecté,
+/// sans clé API. Aucun outil, aucune extension, aucun réglage de projet n'est chargé.
+enum ClaudeCodeClient {
+    static func locate() -> String? {
+        let home = NSHomeDirectory()
+        return ["\(home)/.local/bin/claude", "\(home)/.claude/local/claude", "/opt/homebrew/bin/claude",
+                "/usr/local/bin/claude", "\(home)/.npm-global/bin/claude", "\(home)/.bun/bin/claude"]
+            .first { FileManager.default.isExecutableFile(atPath: $0) }
+    }
+
+    static func run(_ action: TextAction, on text: String) async throws -> String {
+        guard let exe = locate() else { throw ClaudeError.noClaudeCode }
+        let args = ["-p", "--model", Prefs.model, "--effort", "low", "--tools", "",
+                    "--system-prompt", action.systemPrompt(signature: Prefs.signature),
+                    "--no-session-persistence", "--disable-slash-commands",
+                    "--setting-sources", "", "--strict-mcp-config"]
+        let input = "<texte>\n\(text)\n</texte>"
+
+        let (status, out, err) = try await withCheckedThrowingContinuation {
+            (cont: CheckedContinuation<(Int32, String, String), Error>) in
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: exe)
+            p.arguments = args
+            p.currentDirectoryURL = FileManager.default.temporaryDirectory
+            let stdin = Pipe(), stdout = Pipe(), stderr = Pipe()
+            p.standardInput = stdin
+            p.standardOutput = stdout
+            p.standardError = stderr
+            p.terminationHandler = { proc in
+                let o = String(data: stdout.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+                let e = String(data: stderr.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+                cont.resume(returning: (proc.terminationStatus, o, e))
+            }
+            do {
+                try p.run()
+                stdin.fileHandleForWriting.write(Data(input.utf8))
+                try? stdin.fileHandleForWriting.close()
+                DispatchQueue.global().asyncAfter(deadline: .now() + 90) { if p.isRunning { p.terminate() } }
+            } catch {
+                cont.resume(throwing: error)
+            }
+        }
+
+        let result = out.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard status == 0, !result.isEmpty else {
+            let detail = (err.isEmpty ? out : err).trimmingCharacters(in: .whitespacesAndNewlines)
+            if detail.lowercased().contains("authenticate") || detail.lowercased().contains("login") {
+                throw ClaudeError.claudeCode("Claude Code n'est pas connecté. Dans le Terminal, lancez : claude auth login")
+            }
+            throw status == 0 ? ClaudeError.empty : ClaudeError.claudeCode("Claude Code a échoué : \(detail.prefix(200))")
+        }
+        return result
     }
 }

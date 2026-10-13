@@ -35,34 +35,28 @@ enum Prefs {
     static var replaceSelection: Bool {
         UserDefaults.standard.object(forKey: replaceKey) as? Bool ?? true
     }
+    static let backendKey = "backend"
+    /// Moteur : « api » (clé API Anthropic) ou « claudeCode » (commande claude, forfait Max).
+    static var usesClaudeCode: Bool {
+        UserDefaults.standard.string(forKey: backendKey) == "claudeCode"
+    }
     static var signature: String {
         UserDefaults.standard.string(forKey: signatureKey) ?? "Dany"
-    }
-
-    static let autoUpdateKey = "autoCheckUpdates"
-    static let lastUpdateCheckKey = "lastUpdateCheck"
-    static var autoCheckUpdates: Bool {
-        UserDefaults.standard.object(forKey: autoUpdateKey) as? Bool ?? true
     }
 }
 
 enum Keychain {
-    /// Un secret du Trousseau : la clé API Anthropic (par défaut) ou le jeton GitHub des mises à jour.
-    struct Slot {
-        let service: String
-        let account: String
-        static let anthropic = Slot(service: "ca.dany.AutoCorrection.apikey", account: "anthropic")
-        static let github = Slot(service: "ca.dany.AutoCorrection.github", account: "github")
-    }
+    private static let service = "ca.dany.AutoCorrection.apikey"
+    private static let account = "anthropic"
 
-    private static func base(_ slot: Slot) -> [String: Any] {
+    private static var base: [String: Any] {
         [kSecClass as String: kSecClassGenericPassword,
-         kSecAttrService as String: slot.service,
-         kSecAttrAccount as String: slot.account]
+         kSecAttrService as String: service,
+         kSecAttrAccount as String: account]
     }
 
-    static func read(_ slot: Slot = .anthropic) -> String? {
-        var q = base(slot)
+    static func read() -> String? {
+        var q = base
         q[kSecReturnData as String] = true
         q[kSecMatchLimit as String] = kSecMatchLimitOne
         var out: AnyObject?
@@ -72,10 +66,10 @@ enum Keychain {
     }
 
     @discardableResult
-    static func write(_ value: String, to slot: Slot = .anthropic) -> Bool {
-        SecItemDelete(base(slot) as CFDictionary)
+    static func write(_ value: String) -> Bool {
+        SecItemDelete(base as CFDictionary)
         guard !value.isEmpty else { return true }
-        var q = base(slot)
+        var q = base
         q[kSecValueData as String] = Data(value.utf8)
         return SecItemAdd(q as CFDictionary, nil) == errSecSuccess
     }
