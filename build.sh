@@ -16,7 +16,7 @@
 set -euo pipefail
 
 APP_NAME="AutoCorrection"
-VERSION="1.3"
+VERSION="1.4"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 DIST_DIR="${ROOT_DIR}/build"

@@ -1,5 +1,9 @@
 # Changements
 
+## 1.4 — 2026-10-13
+### Ajouté
+- Réglages : choix du modèle (Haiku 5.5, Sonnet 5.5, Opus 5.5) et du niveau de réflexion (faible, moyen, élevé), pour les deux moteurs. Par défaut : Haiku 5.5, réflexion faible.
+
 ## 1.3 — 2026-10-13
 ### Ajouté
 - Moteur « Claude Code » : les textes peuvent être traités par la commande `claude` du Mac, avec le forfait du compte connecté (Max), sans clé API. Choix du moteur dans les réglages.

@@ -28,6 +28,18 @@ enum Prefs {
 
     static let defaultModel = "claude-haiku-5-5"
 
+    /// Modèles proposés dans les réglages (identifiant, libellé). Un identifiant saisi autrement reste utilisable.
+    static let models = [("claude-haiku-5-5", "Haiku 5.5 : le plus économique"),
+                         ("claude-sonnet-5-5", "Sonnet 5.5 : équilibré"),
+                         ("claude-opus-5-5", "Opus 5.5 : le plus puissant")]
+
+    static let effortKey = "effort"
+    static let efforts = [("low", "Faible"), ("medium", "Moyen"), ("high", "Élevé")]
+    static var effort: String {
+        let v = UserDefaults.standard.string(forKey: effortKey) ?? ""
+        return efforts.contains { $0.0 == v } ? v : "low"
+    }
+
     static var model: String {
         let v = UserDefaults.standard.string(forKey: modelKey) ?? ""
         return v.isEmpty ? defaultModel : v

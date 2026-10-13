@@ -10,6 +10,7 @@ final class SettingsState: ObservableObject {
 struct SettingsView: View {
     @AppStorage(Prefs.backendKey) private var backend = "api"
     @AppStorage(Prefs.modelKey) private var model = ""
+    @AppStorage(Prefs.effortKey) private var effort = "low"
     @AppStorage(Prefs.replaceKey) private var replace = true
     @AppStorage(Prefs.signatureKey) private var signature = "Dany"
     @StateObject private var state = SettingsState()
@@ -42,7 +43,17 @@ struct SettingsView: View {
                              : "Claude Code est introuvable sur ce Mac.")
                     }
                 }
-                TextField("Modèle", text: $model, prompt: Text(Prefs.defaultModel))
+                Picker("Modèle", selection: modelChoice) {
+                    ForEach(Prefs.models, id: \.0) { Text($0.1).tag($0.0) }
+                    if !Prefs.models.contains(where: { $0.0 == modelChoice.wrappedValue }) {
+                        Text(modelChoice.wrappedValue).tag(modelChoice.wrappedValue)
+                    }
+                }
+                Picker("Réflexion", selection: $effort) {
+                    ForEach(Prefs.efforts, id: \.0) { Text($0.1).tag($0.0) }
+                }
+                Text("Faible : rapide et économique, suffisant pour corriger. Élevé : plus lent et plus cher, pour les textes délicats.")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Comportement") {
                 ShortcutRecorder()
@@ -69,5 +80,9 @@ struct SettingsView: View {
         .onReceive(Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()) { _ in
             state.trusted = Clipboard.isTrusted
         }
+    }
+
+    private var modelChoice: Binding<String> {
+        Binding(get: { model.isEmpty ? Prefs.defaultModel : model }, set: { model = $0 })
     }
 }

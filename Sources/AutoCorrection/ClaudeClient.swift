@@ -33,7 +33,7 @@ enum ClaudeClient {
         let body: [String: Any] = [
             "model": Prefs.model,
             "max_tokens": 4096,
-            "output_config": ["effort": "low"], // correction de texte : réflexion minimale, réponse rapide et peu coûteuse
+            "output_config": ["effort": Prefs.effort],
             "system": action.systemPrompt(signature: Prefs.signature),
             "messages": [["role": "user", "content": "<texte>\n\(text)\n</texte>"]]
         ]
@@ -67,7 +67,7 @@ enum ClaudeCodeClient {
 
     static func run(_ action: TextAction, on text: String) async throws -> String {
         guard let exe = locate() else { throw ClaudeError.noClaudeCode }
-        let args = ["-p", "--model", Prefs.model, "--effort", "low", "--tools", "",
+        let args = ["-p", "--model", Prefs.model, "--effort", Prefs.effort, "--tools", "",
                     "--system-prompt", action.systemPrompt(signature: Prefs.signature),
                     "--no-session-persistence", "--disable-slash-commands",
                     "--setting-sources", "", "--strict-mcp-config"]
