@@ -15,13 +15,13 @@ Les fichiers produits vont dans `build/`, ignoré par git. Rien de compilé n'es
 
 ## Publier une version
 
-Aucune version n'a encore été publiée. Quand ce sera le cas, dans cet ordre :
+Dans cet ordre :
 
 1. Mettre le numéro à jour dans `build.sh` (`CFBundleShortVersionString` et `CFBundleVersion`) et ajouter la section `## X.Y — date` dans `CHANGELOG.md`.
 2. `git add -A && git commit -m "Version X.Y" && git push origin main`
-3. `./build.sh` (produit `build/AutoCorrection.app` ; le standard demande un `.dmg` signé et notarisé, pas encore en place)
+3. `./build.sh` (produit `build/AutoCorrection.dmg`, signé et notarisé ; `./build.sh --install` installe aussi dans `/Applications`)
 4. `git tag -a vX.Y -m "Version X.Y" && git push origin vX.Y`
-5. `gh release create vX.Y <fichier> --title "AutoCorrection X.Y" --notes "$(~/.claude/skills/standard-projet/scripts/notes-version.sh X.Y)"`
+5. `gh release create vX.Y build/AutoCorrection.dmg --title "AutoCorrection X.Y" --notes "$(~/.claude/skills/standard-projet/scripts/notes-version.sh X.Y)"`
 
 ## Règles
 

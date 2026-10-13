@@ -12,19 +12,19 @@ Petite app Mac, dans la barre de menus, qui corrige, embellit ou réécrit en co
 
 ## Installer
 
-Pas encore de version publiée : voir « Reconstruire ».
+Télécharge [AutoCorrection.dmg](https://github.com/mdany75/AutoCorrection/releases/latest/download/AutoCorrection.dmg) (toujours la dernière version), ouvre-le, puis glisse AutoCorrection dans Applications.
 
 Configuration requise : macOS 14 ou plus et une clé API Anthropic. Au premier lancement, accorder l'autorisation Accessibilité (Réglages Système > Confidentialité et sécurité) pour que l'app puisse copier et coller le texte, puis saisir la clé dans les réglages.
 
 ## Reconstruire
 
-Outils nécessaires : Swift 5.9 ou plus (outils en ligne de commande Xcode).
+Outils nécessaires : Swift 5.9 ou plus (outils en ligne de commande Xcode). Avec le certificat « Developer ID Application » et le profil `notarisation` de `notarytool`, l'image disque est signée et notarisée ; sinon, signature ad hoc.
 
 ```bash
 ./build.sh
 ```
 
-Produit `build/AutoCorrection.app` (signature ad hoc).
+Produit `build/AutoCorrection.app` et `build/AutoCorrection.dmg`. L'option `--install` installe aussi dans `/Applications`.
 
 ## Organisation
 
