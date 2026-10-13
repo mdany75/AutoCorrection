@@ -1,5 +1,9 @@
 # Changements
 
+## 1.7.1 — 2026-10-13
+### Corrigé
+- Pendant la dictée, l'en-tête de la palette affiche « Dictée en cours… » au lieu de « Aucun texte sélectionné ».
+
 ## 1.7 — 2026-10-13
 ### Ajouté
 - Dictée vocale : quand rien n'est sélectionné, la palette propose « Dicter un texte ». Le texte s'affiche en direct pendant que vous parlez (reconnaissance d'Apple, en français, sur le Mac quand c'est possible), puis les trois actions s'appliquent au texte dicté. « Redicter » recommence.

@@ -39,6 +39,11 @@ struct PaletteView: View {
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.separator))
     }
 
+    private var isListening: Bool {
+        if case .listening = model.phase { return true }
+        return false
+    }
+
     private var isWorking: Bool {
         if case .working = model.phase { return true }
         return false
@@ -46,11 +51,14 @@ struct PaletteView: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: model.fromDictation ? "microphone" : "sparkles")
+            Image(systemName: model.fromDictation || isListening ? "microphone" : "sparkles")
                 .font(.system(size: 16))
                 .foregroundStyle(.tint)
                 .padding(.top, 2)
-            if model.selection.isEmpty {
+            if case .listening = model.phase {
+                Text("Dictée en cours…")
+                    .foregroundStyle(.secondary)
+            } else if model.selection.isEmpty {
                 Text("Aucun texte sélectionné. Sélectionnez du texte, ou dictez-le.")
                     .foregroundStyle(.secondary)
             } else {
