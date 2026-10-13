@@ -1,17 +1,17 @@
 # AutoCorrection
 
-Petite app Mac, dans la barre de menus, qui corrige, embellit ou réécrit en courriel professionnel le texte sélectionné dans n'importe quelle app, grâce à Claude.
+Petite app Mac, dans la barre de menus, qui corrige, rend professionnel ou réécrit en courriel le texte sélectionné dans n'importe quelle app, grâce à Claude.
 
 ![AutoCorrection](docs/capture.png)
 
 ## Fonctions
 
 - Raccourci global (⌥Espace par défaut, modifiable dans les réglages) qui ouvre une palette flottante sur le texte sélectionné.
-- Trois actions : corriger seulement (↵), corriger et embellir (⌘↵), réécrire en courriel professionnel avec signature (⌥↵).
+- Trois actions : corriger seulement (↵), corriger et rendre professionnel (⌘↵), réécrire en courriel (⌥↵, style professionnel standard, français québécois, sans signature).
 - Le résultat remplace la sélection, ou va dans le presse-papiers selon le réglage.
 - Le presse-papiers d'origine est rétabli après chaque opération.
 - Deux moteurs au choix : une clé API Anthropic, ou la commande `claude` de Claude Code (forfait Max, sans clé API).
-- Clé API conservée dans le Trousseau ; modèle (Haiku 5.5, Sonnet 5.5 ou Opus 5.5), niveau de réflexion (faible par défaut) et signature configurables.
+- Clé API conservée dans le Trousseau ; modèle (Haiku 5.5, Sonnet 5.5 ou Opus 5.5), niveau de réflexion (faible par défaut) configurables.
 
 ## Installer
 

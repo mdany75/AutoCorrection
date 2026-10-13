@@ -4,7 +4,6 @@ import Security
 enum Prefs {
     static let modelKey = "model"
     static let replaceKey = "replaceSelection"
-    static let signatureKey = "signature"
 
     static let hotKeyCodeKey = "hotKeyCode"
     static let hotKeyModsKey = "hotKeyMods"
@@ -51,9 +50,6 @@ enum Prefs {
     /// Moteur : « api » (clé API Anthropic) ou « claudeCode » (commande claude, forfait Max).
     static var usesClaudeCode: Bool {
         UserDefaults.standard.string(forKey: backendKey) == "claudeCode"
-    }
-    static var signature: String {
-        UserDefaults.standard.string(forKey: signatureKey) ?? "Dany"
     }
 }
 

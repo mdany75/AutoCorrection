@@ -1,5 +1,13 @@
 # Changements
 
+## 1.5 — 2026-10-13
+### Modifié
+- « Corriger et embellir » devient « Corriger et rendre professionnel » : corrige puis reformule dans un ton professionnel, clair et direct.
+- « Réécrire en courriel » suit le style professionnel standard de Dany : français québécois, tutoiement ou vouvoiement selon le texte, « Bonjour [Prénom], », une à trois phrases courtes, « Merci, ».
+
+### Retiré
+- La signature des courriels et son réglage : le courriel se termine par « Merci, ».
+
 ## 1.4 — 2026-10-13
 ### Ajouté
 - Réglages : choix du modèle (Haiku 5.5, Sonnet 5.5, Opus 5.5) et du niveau de réflexion (faible, moyen, élevé), pour les deux moteurs. Par défaut : Haiku 5.5, réflexion faible.

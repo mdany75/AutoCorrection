@@ -1,6 +1,6 @@
 # CLAUDE.md — AutoCorrection
 
-App Mac en barre de menus (Swift/SwiftUI, SwiftPM, macOS 14+) qui envoie le texte sélectionné à l'API Anthropic pour le corriger, l'embellir ou le réécrire en courriel professionnel.
+App Mac en barre de menus (Swift/SwiftUI, SwiftPM, macOS 14+) qui envoie le texte sélectionné à l'API Anthropic pour le corriger, le rendre professionnel ou le réécrire en courriel.
 
 Ce projet suit le standard commun des projets de Dany (`/standard-projet` le vérifie).
 

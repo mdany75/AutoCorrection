@@ -34,7 +34,7 @@ enum ClaudeClient {
             "model": Prefs.model,
             "max_tokens": 4096,
             "output_config": ["effort": Prefs.effort],
-            "system": action.systemPrompt(signature: Prefs.signature),
+            "system": action.systemPrompt(),
             "messages": [["role": "user", "content": "<texte>\n\(text)\n</texte>"]]
         ]
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -68,7 +68,7 @@ enum ClaudeCodeClient {
     static func run(_ action: TextAction, on text: String) async throws -> String {
         guard let exe = locate() else { throw ClaudeError.noClaudeCode }
         let args = ["-p", "--model", Prefs.model, "--effort", Prefs.effort, "--tools", "",
-                    "--system-prompt", action.systemPrompt(signature: Prefs.signature),
+                    "--system-prompt", action.systemPrompt(),
                     "--no-session-persistence", "--disable-slash-commands",
                     "--setting-sources", "", "--strict-mcp-config"]
         let input = "<texte>\n\(text)\n</texte>"

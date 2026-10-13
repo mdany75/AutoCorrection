@@ -12,7 +12,6 @@ struct SettingsView: View {
     @AppStorage(Prefs.modelKey) private var model = ""
     @AppStorage(Prefs.effortKey) private var effort = "low"
     @AppStorage(Prefs.replaceKey) private var replace = true
-    @AppStorage(Prefs.signatureKey) private var signature = "Dany"
     @StateObject private var state = SettingsState()
 
     var body: some View {
@@ -58,7 +57,6 @@ struct SettingsView: View {
             Section("Comportement") {
                 ShortcutRecorder()
                 Toggle("Remplacer le texte sélectionné par le résultat", isOn: $replace)
-                TextField("Signature des courriels", text: $signature)
             }
             Section("Autorisation macOS") {
                 HStack {
