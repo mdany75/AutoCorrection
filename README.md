@@ -2,6 +2,8 @@
 
 Petite app Mac, dans la barre de menus, qui corrige, embellit ou réécrit en courriel professionnel le texte sélectionné dans n'importe quelle app, grâce à Claude.
 
+![AutoCorrection](docs/capture.png)
+
 ## Fonctions
 
 - Raccourci global (⌥Espace par défaut, modifiable dans les réglages) qui ouvre une palette flottante sur le texte sélectionné.
