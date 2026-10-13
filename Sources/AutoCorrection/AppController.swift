@@ -108,7 +108,13 @@ final class AppController: NSObject, NSApplicationDelegate {
         panel.hasShadow = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         panel.onCancel = { [weak self] in self?.hidePanel() }
-        panel.contentView = NSHostingView(rootView: PaletteView(model: model))
+        let hosting = NSHostingView(rootView: PaletteView(model: model))
+        // Coins arrondis au niveau de la fenêtre : l'ombre système suit alors la forme arrondie, sans coins carrés.
+        hosting.wantsLayer = true
+        hosting.layer?.cornerRadius = 26
+        hosting.layer?.cornerCurve = .continuous
+        hosting.layer?.masksToBounds = true
+        panel.contentView = hosting
     }
 
     private func showPanel() {
@@ -119,6 +125,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         panel.setFrame(NSRect(x: f.midX - size.width / 2, y: f.midY + f.height * 0.12 - size.height,
                               width: size.width, height: size.height), display: true)
         panel.makeKeyAndOrderFront(nil)
+        refreshShadow()
 
         // Un clic en dehors de la palette (ouverte par erreur) la ferme, sauf pendant le traitement.
         if outsideClickMonitor == nil {
@@ -141,7 +148,13 @@ final class AppController: NSObject, NSApplicationDelegate {
             f.origin.y = f.maxY - size.height
             f.size = size
             panel.setFrame(f, display: true, animate: false)
+            refreshShadow()
         }
+    }
+
+    /// L'ombre de la fenêtre est calculée une fois : après un changement de taille ou d'affichage, il faut la recalculer.
+    private func refreshShadow() {
+        DispatchQueue.main.async { [panel] in panel?.invalidateShadow() }
     }
 
     private func hidePanel() {

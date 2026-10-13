@@ -1,5 +1,9 @@
 # Changements
 
+## 1.9.3 — 2026-10-13
+### Corrigé
+- Palette : coins arrondis au niveau de la fenêtre et ombre recalculée à chaque affichage et changement de taille, pour éviter les coins carrés gris.
+
 ## 1.9.2 — 2026-10-13
 ### Modifié
 - Palette : plus aucun bouton en bleu au repos ; le bleu n'apparaît qu'au survol de la souris.
