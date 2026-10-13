@@ -38,3 +38,7 @@ Produit `build/AutoCorrection.app` et `build/AutoCorrection.dmg`. L'option `--in
 - `Resources/` : icône de l'app
 - `scripts/` : génération de l'icône
 - `build.sh` : compile et assemble l'app dans `build/`
+
+## Licence
+
+MIT, voir [LICENSE](LICENSE).
