@@ -16,6 +16,8 @@ final class AppController: NSObject, NSApplicationDelegate {
     private var settingsWindow: NSWindow?
     private let model = PaletteModel()
     private var busy = false
+    private let dictation = Dictation()
+    private var outsideClickMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -69,6 +71,9 @@ final class AppController: NSObject, NSApplicationDelegate {
     private func setupPanel() {
         model.onRun = { [weak self] in self?.run($0) }
         model.onClose = { [weak self] in self?.hidePanel() }
+        model.onDictate = { [weak self] in self?.startDictation() }
+        model.onFinishDictation = { [weak self] in Task { @MainActor in await self?.finishDictation() } }
+        model.onCancelDictation = { [weak self] in self?.cancelDictation() }
         model.onSettings = { [weak self] in self?.hidePanel(); self?.openSettings() }
 
         panel = PalettePanel(contentRect: NSRect(x: 0, y: 0, width: 440, height: 200),
@@ -93,9 +98,34 @@ final class AppController: NSObject, NSApplicationDelegate {
         panel.setFrame(NSRect(x: f.midX - size.width / 2, y: f.midY + f.height * 0.12 - size.height,
                               width: size.width, height: size.height), display: true)
         panel.makeKeyAndOrderFront(nil)
+
+        // Un clic en dehors de la palette (ouverte par erreur) la ferme, sauf pendant le traitement.
+        if outsideClickMonitor == nil {
+            outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+                Task { @MainActor in
+                    guard let self, self.panel.isVisible else { return }
+                    if case .working = self.model.phase { return }
+                    self.hidePanel()
+                }
+            }
+        }
+    }
+
+    /// Redimensionne la palette à son contenu en gardant son bord supérieur en place.
+    private func fitPanel() {
+        guard let hosting = panel.contentView as? NSHostingView<PaletteView> else { return }
+        DispatchQueue.main.async { [self] in
+            let size = hosting.fittingSize
+            var f = panel.frame
+            f.origin.y = f.maxY - size.height
+            f.size = size
+            panel.setFrame(f, display: true, animate: false)
+        }
     }
 
     private func hidePanel() {
+        dictation.cancel()
+        if let m = outsideClickMonitor { NSEvent.removeMonitor(m); outsideClickMonitor = nil }
         panel.orderOut(nil)
         model.phase = .idle
     }
@@ -128,9 +158,53 @@ final class AppController: NSObject, NSApplicationDelegate {
         }
         busy = true
         model.phase = .idle
+        model.fromDictation = false
         model.selection = await Clipboard.captureSelection() ?? ""
         busy = false
         showPanel()
+    }
+
+    // MARK: - Dictée
+
+    private func startDictation() {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            if let err = await Dictation.authorize() { model.phase = .error(err); fitPanel(); return }
+            model.transcript = ""
+            model.levels = [Float](repeating: 0, count: model.levels.count)
+            do {
+                try dictation.start(
+                    onText: { [weak self] in self?.model.transcript = $0 },
+                    onLevel: { [weak self] in self?.model.pushLevel($0) },
+                    onError: { [weak self] msg in
+                        self?.dictation.cancel()
+                        self?.model.phase = .error(msg)
+                        self?.fitPanel()
+                    })
+                model.phase = .listening
+            } catch {
+                model.phase = .error(error.localizedDescription)
+            }
+            fitPanel()
+        }
+    }
+
+    private func finishDictation() async {
+        let text = await dictation.finish()
+        if text.isEmpty {
+            model.phase = .error("Aucune parole détectée. Vérifiez le microphone et réessayez.")
+        } else {
+            model.selection = text
+            model.fromDictation = true
+            model.phase = .idle
+        }
+        fitPanel()
+    }
+
+    private func cancelDictation() {
+        dictation.cancel()
+        model.phase = .idle
+        fitPanel()
     }
 
     private func run(_ action: TextAction) {

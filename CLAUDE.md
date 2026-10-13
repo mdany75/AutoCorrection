@@ -35,7 +35,7 @@ Dans cet ordre :
 
 ## Organisation
 
-- `Sources/AutoCorrection/` : `AppController` (barre de menus, palette, flux), `Clipboard` (⌘C/⌘V simulés, Accessibilité), `ClaudeClient` (API), `Actions` (actions et prompts), `HotKey` et `ShortcutRecorder` (raccourci global), `Prefs` (préférences et Trousseau), `PaletteView` et `SettingsView` (interface)
-- `Resources/` : icône
+- `Sources/AutoCorrection/` : `AppController` (barre de menus, palette, flux), `Clipboard` (⌘C/⌘V simulés, Accessibilité), `Dictation` (dictée vocale, framework Speech), `ClaudeClient` (API), `Actions` (actions et prompts), `HotKey` et `ShortcutRecorder` (raccourci global), `Prefs` (préférences et Trousseau), `PaletteView` et `SettingsView` (interface)
+- `Resources/` : icône, `AutoCorrection.entitlements` (droit d'entrée audio, nécessaire sous le runtime durci)
 - `scripts/` : génération de l'icône (`make-icon.swift`)
 - `docs/` : capture d'écran, cahier des charges

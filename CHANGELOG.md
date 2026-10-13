@@ -1,5 +1,11 @@
 # Changements
 
+## 1.7 — 2026-10-13
+### Ajouté
+- Dictée vocale : quand rien n'est sélectionné, la palette propose « Dicter un texte ». Le texte s'affiche en direct pendant que vous parlez (reconnaissance d'Apple, en français, sur le Mac quand c'est possible), puis les trois actions s'appliquent au texte dicté. « Redicter » recommence.
+- Palette : bouton de fermeture (×) et fermeture par un clic en dehors de la palette, pour la refermer facilement si elle s'ouvre par erreur.
+- Autorisations macOS demandées au premier usage : Microphone et Reconnaissance vocale.
+
 ## 1.6 — 2026-10-13
 ### Ajouté
 - Réglages, moteur Claude Code : indicateur « connecté / non connecté » et bouton « Se connecter » (équivalent de `claude auth login`) qui ouvre le navigateur pour relier Claude Code au compte.
