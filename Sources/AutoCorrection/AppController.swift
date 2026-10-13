@@ -106,7 +106,6 @@ final class AppController: NSObject, NSApplicationDelegate {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
-        panel.isMovableByWindowBackground = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         panel.onCancel = { [weak self] in self?.hidePanel() }
         panel.contentView = NSHostingView(rootView: PaletteView(model: model))

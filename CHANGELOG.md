@@ -1,5 +1,12 @@
 # Changements
 
+## 1.9.2 — 2026-10-13
+### Modifié
+- Palette : plus aucun bouton en bleu au repos ; le bleu n'apparaît qu'au survol de la souris.
+
+### Corrigé
+- La palette se déplace enfin : glisser sur une zone sans bouton (en-tête, marges, pied).
+
 ## 1.9.1 — 2026-10-13
 ### Modifié
 - Palette : les gros carrés sont blancs et passent à un bleu plus foncé au survol de la souris (le bouton principal reste bleu).

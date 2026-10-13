@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 enum PalettePhase: Equatable {
@@ -34,6 +35,7 @@ struct PaletteView: View {
             content
         }
         .frame(width: 440)
+        .modifier(WindowDrag())
         .modifier(GlassPanel())
     }
 
@@ -88,11 +90,11 @@ struct PaletteView: View {
             VStack(spacing: 0) {
                 HStack(spacing: 8) {
                     tile(model.fromDictation ? "Redicter" : "Dicter", icon: "microphone", shortcut: "Espace",
-                         prominent: !hasText, enabled: !hasText || model.fromDictation) { model.onDictate() }
+                         enabled: !hasText || model.fromDictation) { model.onDictate() }
                         .keyboardShortcut(.space, modifiers: [])
-                    tile(.correct, key: .return, mods: [], prominent: hasText)
-                    tile(.polish, key: .return, mods: .command, prominent: false)
-                    tile(.email, key: .return, mods: .option, prominent: false)
+                    tile(.correct, key: .return, mods: [])
+                    tile(.polish, key: .return, mods: .command)
+                    tile(.email, key: .return, mods: .option)
                 }
                 .padding(.horizontal, 12)
                 .padding(.top, 10)
@@ -167,7 +169,7 @@ struct PaletteView: View {
         .padding(.top, 2)
     }
 
-    private func tile(_ title: String, icon: String, shortcut: String, prominent: Bool, enabled: Bool,
+    private func tile(_ title: String, icon: String, shortcut: String, enabled: Bool,
                       action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 5) {
@@ -177,13 +179,13 @@ struct PaletteView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .buttonStyle(TileStyle(prominent: prominent))
+        .buttonStyle(TileStyle())
         .aspectRatio(1, contentMode: .fit)
         .disabled(!enabled)
     }
 
-    private func tile(_ action: TextAction, key: KeyEquivalent, mods: EventModifiers, prominent: Bool) -> some View {
-        tile(action.shortTitle, icon: action.icon, shortcut: action.shortcutLabel, prominent: prominent,
+    private func tile(_ action: TextAction, key: KeyEquivalent, mods: EventModifiers) -> some View {
+        tile(action.shortTitle, icon: action.icon, shortcut: action.shortcutLabel,
              enabled: !model.selection.isEmpty) { model.onRun(action) }
             .keyboardShortcut(key, modifiers: mods)
     }
@@ -208,30 +210,24 @@ private struct GlassPanel: ViewModifier {
     }
 }
 
-/// Gros carré blanc ; bleu plus foncé au survol. Le bouton principal reste bleu (plus foncé au survol).
+/// Gros carré blanc ; il ne devient bleu qu'au survol de la souris.
 private struct TileStyle: ButtonStyle {
-    let prominent: Bool
-
     func makeBody(configuration: Configuration) -> some View {
-        TileBody(configuration: configuration, prominent: prominent)
+        TileBody(configuration: configuration)
     }
 
     private struct TileBody: View {
         let configuration: Configuration
-        let prominent: Bool
         @Environment(\.isEnabled) private var enabled
         @State private var hovering = false
 
         var body: some View {
             let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
             let hot = hovering && enabled
-            let fill: Color = hot ? Color(red: 0.08, green: 0.36, blue: 0.86)
-                : prominent ? Color(red: 0.24, green: 0.55, blue: 1).opacity(0.8)
-                : Color.white.opacity(0.92)
-            let stroke: Color = hot || prominent ? Color(red: 0.47, green: 0.69, blue: 1).opacity(0.75)
-                : Color.black.opacity(0.1)
+            let fill: Color = hot ? Color(red: 0.08, green: 0.36, blue: 0.86) : Color.white.opacity(0.92)
+            let stroke: Color = hot ? Color(red: 0.47, green: 0.69, blue: 1).opacity(0.75) : Color.black.opacity(0.1)
             configuration.label
-                .foregroundStyle(hot || prominent ? Color.white : Color(red: 0.08, green: 0.09, blue: 0.12))
+                .foregroundStyle(hot ? Color.white : Color(red: 0.08, green: 0.09, blue: 0.12))
                 .background(fill, in: shape)
                 .overlay(shape.strokeBorder(stroke))
                 .opacity(enabled ? 1 : 0.5)
@@ -239,5 +235,24 @@ private struct TileStyle: ButtonStyle {
                 .animation(.easeOut(duration: 0.12), value: hot)
                 .onHover { hovering = $0 }
         }
+    }
+}
+
+/// Déplace la fenêtre quand on glisse sur une zone sans bouton. `isMovableByWindowBackground` ne suffit pas :
+/// la vue SwiftUI garde les clics pour elle.
+private struct WindowDrag: ViewModifier {
+    @State private var start: (mouse: NSPoint, origin: NSPoint)?
+
+    func body(content: Content) -> some View {
+        content.gesture(
+            DragGesture(minimumDistance: 2, coordinateSpace: .global)
+                .onChanged { _ in
+                    guard let w = NSApp.keyWindow ?? NSApp.windows.first(where: \.isVisible) else { return }
+                    let m = NSEvent.mouseLocation
+                    if start == nil { start = (m, w.frame.origin) }
+                    guard let s = start else { return }
+                    w.setFrameOrigin(NSPoint(x: s.origin.x + m.x - s.mouse.x, y: s.origin.y + m.y - s.mouse.y))
+                }
+                .onEnded { _ in start = nil })
     }
 }
