@@ -28,6 +28,7 @@ enum ClaudeClient {
         let body: [String: Any] = [
             "model": Prefs.model,
             "max_tokens": 4096,
+            "output_config": ["effort": "low"], // correction de texte : réflexion minimale, réponse rapide et peu coûteuse
             "system": action.systemPrompt(signature: Prefs.signature),
             "messages": [["role": "user", "content": "<texte>\n\(text)\n</texte>"]]
         ]

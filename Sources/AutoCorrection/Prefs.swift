@@ -26,7 +26,7 @@ enum Prefs {
         [hotKeyCodeKey, hotKeyModsKey, hotKeyLabelKey].forEach { d.removeObject(forKey: $0) }
     }
 
-    static let defaultModel = "claude-sonnet-5-5"
+    static let defaultModel = "claude-haiku-5-5"
 
     static var model: String {
         let v = UserDefaults.standard.string(forKey: modelKey) ?? ""
