@@ -38,20 +38,31 @@ enum Prefs {
     static var signature: String {
         UserDefaults.standard.string(forKey: signatureKey) ?? "Dany"
     }
+
+    static let autoUpdateKey = "autoCheckUpdates"
+    static let lastUpdateCheckKey = "lastUpdateCheck"
+    static var autoCheckUpdates: Bool {
+        UserDefaults.standard.object(forKey: autoUpdateKey) as? Bool ?? true
+    }
 }
 
 enum Keychain {
-    private static let service = "ca.dany.AutoCorrection.apikey"
-    private static let account = "anthropic"
-
-    private static var base: [String: Any] {
-        [kSecClass as String: kSecClassGenericPassword,
-         kSecAttrService as String: service,
-         kSecAttrAccount as String: account]
+    /// Un secret du Trousseau : la clé API Anthropic (par défaut) ou le jeton GitHub des mises à jour.
+    struct Slot {
+        let service: String
+        let account: String
+        static let anthropic = Slot(service: "ca.dany.AutoCorrection.apikey", account: "anthropic")
+        static let github = Slot(service: "ca.dany.AutoCorrection.github", account: "github")
     }
 
-    static func read() -> String? {
-        var q = base
+    private static func base(_ slot: Slot) -> [String: Any] {
+        [kSecClass as String: kSecClassGenericPassword,
+         kSecAttrService as String: slot.service,
+         kSecAttrAccount as String: slot.account]
+    }
+
+    static func read(_ slot: Slot = .anthropic) -> String? {
+        var q = base(slot)
         q[kSecReturnData as String] = true
         q[kSecMatchLimit as String] = kSecMatchLimitOne
         var out: AnyObject?
@@ -61,10 +72,10 @@ enum Keychain {
     }
 
     @discardableResult
-    static func write(_ value: String) -> Bool {
-        SecItemDelete(base as CFDictionary)
+    static func write(_ value: String, to slot: Slot = .anthropic) -> Bool {
+        SecItemDelete(base(slot) as CFDictionary)
         guard !value.isEmpty else { return true }
-        var q = base
+        var q = base(slot)
         q[kSecValueData as String] = Data(value.utf8)
         return SecItemAdd(q as CFDictionary, nil) == errSecSuccess
     }

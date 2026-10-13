@@ -10,6 +10,7 @@ Petite app Mac, dans la barre de menus, qui corrige, embellit ou réécrit en co
 - Trois actions : corriger seulement (↵), corriger et embellir (⌘↵), réécrire en courriel professionnel avec signature (⌥↵).
 - Le résultat remplace la sélection, ou va dans le presse-papiers selon le réglage.
 - Le presse-papiers d'origine est rétabli après chaque opération.
+- Mises à jour automatiques depuis les Releases GitHub, installées en un clic.
 - Clé API Anthropic conservée dans le Trousseau ; modèle et signature configurables.
 
 ## Installer
@@ -17,6 +18,10 @@ Petite app Mac, dans la barre de menus, qui corrige, embellit ou réécrit en co
 Télécharge [AutoCorrection.dmg](https://github.com/mdany75/AutoCorrection/releases/latest/download/AutoCorrection.dmg) (toujours la dernière version), ouvre-le, puis glisse AutoCorrection dans Applications.
 
 Configuration requise : macOS 14 ou plus et une clé API Anthropic. Au premier lancement, accorder l'autorisation Accessibilité (Réglages Système > Confidentialité et sécurité) pour que l'app puisse copier et coller le texte, puis saisir la clé dans les réglages.
+
+### Mises à jour
+
+Le dépôt étant privé, l'app a besoin d'un jeton GitHub en lecture seule : sur GitHub, Réglages > Developer settings > Fine-grained tokens, accès au seul dépôt `mdany75/AutoCorrection`, permission « Contents : Read-only ». Collez-le dans les réglages de l'app (il va dans le Trousseau). L'app vérifie ensuite au lancement puis chaque jour ; le menu propose « Installer la version X ». Seule une app signée par le même développeur et notarisée est acceptée.
 
 ## Reconstruire
 
