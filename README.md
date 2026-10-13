@@ -9,6 +9,7 @@ Petite app Mac, dans la barre de menus, qui corrige, rend professionnel ou réé
 - Raccourci global (⌥Espace par défaut, modifiable dans les réglages) qui ouvre une palette flottante sur le texte sélectionné.
 - Trois actions : corriger seulement (↵), corriger et rendre professionnel (⌘↵), réécrire en courriel (⌥↵, style professionnel standard, français québécois, sans signature).
 - Dictée vocale : sans texte sélectionné, « Dicter un texte » transcrit votre voix en direct (français), puis les trois actions s'appliquent au texte dicté.
+- Menu « Rechercher les mises à jour… » : installe la dernière version publiée sur GitHub, après vérification de la signature.
 - La palette se ferme avec le bouton ×, par un clic en dehors, ou avec Esc.
 - Le résultat remplace la sélection, ou va dans le presse-papiers selon le réglage.
 - Le presse-papiers d'origine est rétabli après chaque opération.

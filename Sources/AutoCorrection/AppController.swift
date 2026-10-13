@@ -11,6 +11,7 @@ final class PalettePanel: NSPanel {
 @MainActor
 final class AppController: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
+    private var updateItem: NSMenuItem!
     private var panel: PalettePanel!
     private var hotKey: HotKey?
     private var settingsWindow: NSWindow?
@@ -63,6 +64,11 @@ final class AppController: NSObject, NSApplicationDelegate {
         menu.addItem(withTitle: "Ouvrir la palette", action: #selector(menuOpenPalette), keyEquivalent: "").target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: "Réglages…", action: #selector(menuSettings), keyEquivalent: ",").target = self
+        menu.addItem(.separator())
+        let version = menu.addItem(withTitle: "Version \(Updater.currentVersion)", action: nil, keyEquivalent: "")
+        version.isEnabled = false
+        updateItem = menu.addItem(withTitle: "Rechercher les mises à jour…", action: #selector(menuUpdate), keyEquivalent: "")
+        updateItem.target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quitter AutoCorrection", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         statusItem.menu = menu
@@ -132,6 +138,43 @@ final class AppController: NSObject, NSApplicationDelegate {
 
     @objc private func menuOpenPalette() { Task { await togglePalette() } }
     @objc private func menuSettings() { openSettings() }
+
+    // MARK: - Mises à jour
+
+    @objc private func menuUpdate() {
+        Task { @MainActor in
+            updateItem.isEnabled = false
+            defer { updateItem.title = "Rechercher les mises à jour…"; updateItem.isEnabled = true }
+            updateItem.title = "Vérification en cours…"
+            do {
+                guard let release = try await Updater.checkForUpdate() else {
+                    alert("AutoCorrection est à jour", "Vous utilisez la dernière version (\(Updater.currentVersion)).")
+                    return
+                }
+                let notes = release.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+                let a = NSAlert()
+                a.messageText = "La version \(release.version) est disponible"
+                a.informativeText = "Vous utilisez la version \(Updater.currentVersion). L'app se fermera et se relancera après l'installation."
+                    + (notes.isEmpty ? "" : "\n\n" + String(notes.prefix(600)))
+                a.addButton(withTitle: "Installer")
+                a.addButton(withTitle: "Plus tard")
+                NSApp.activate(ignoringOtherApps: true)
+                guard a.runModal() == .alertFirstButtonReturn else { return }
+                try await Updater.install(release) { [weak self] in self?.updateItem.title = $0 }
+            } catch {
+                alert("Mise à jour impossible", error.localizedDescription)
+            }
+        }
+    }
+
+    private func alert(_ title: String, _ text: String) {
+        let a = NSAlert()
+        a.messageText = title
+        a.informativeText = text
+        a.addButton(withTitle: "OK")
+        NSApp.activate(ignoringOtherApps: true)
+        a.runModal()
+    }
 
     private func openSettings() {
         if settingsWindow == nil {

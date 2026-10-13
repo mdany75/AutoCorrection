@@ -1,5 +1,12 @@
 # Changements
 
+## 1.8 — 2026-10-13
+### Ajouté
+- Menu de mise à jour : « Rechercher les mises à jour… » dans le menu de la barre de menus, avec le numéro de version affiché. L'app compare avec la dernière Release GitHub, affiche les nouveautés et, après confirmation, télécharge, vérifie la signature (même développeur, notarisée), remplace l'app et la relance.
+
+### Modifié
+- Le dépôt GitHub est public : aucun jeton n'est nécessaire.
+
 ## 1.7.1 — 2026-10-13
 ### Corrigé
 - Pendant la dictée, l'en-tête de la palette affiche « Dictée en cours… » au lieu de « Aucun texte sélectionné ».
