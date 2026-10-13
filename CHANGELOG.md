@@ -1,5 +1,13 @@
 # Changements
 
+## 1.10 — 2026-10-13
+### Ajouté
+- Réglages : « Style de la palette », Liquid Glass (par défaut) ou Standard. Liquid Glass : verre de macOS 26 sur le panneau et les carrés, l'action principale plus lumineuse ; flou teinté sur macOS 14 et 15. Standard : matériau flou classique et carrés blancs.
+- Le texte sélectionné s'affiche en entier : la zone grandit avec le texte jusqu'à 12 lignes, puis une barre de défilement apparaît.
+
+### Modifié
+- Palette plus large (560) ; les quatre carrés gardent leur taille et sont centrés.
+
 ## 1.9.3 — 2026-10-13
 ### Corrigé
 - Palette : coins arrondis au niveau de la fenêtre et ombre recalculée à chaque affichage et changement de taille, pour éviter les coins carrés gris.

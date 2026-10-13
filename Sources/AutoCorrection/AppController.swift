@@ -97,7 +97,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         model.onCancelDictation = { [weak self] in self?.cancelDictation() }
         model.onSettings = { [weak self] in self?.hidePanel(); self?.openSettings() }
 
-        panel = PalettePanel(contentRect: NSRect(x: 0, y: 0, width: 440, height: 200),
+        panel = PalettePanel(contentRect: NSRect(x: 0, y: 0, width: PaletteLayout.width, height: 200),
                              styleMask: [.borderless, .nonactivatingPanel],
                              backing: .buffered, defer: false)
         panel.level = .floating
@@ -111,7 +111,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         let hosting = NSHostingView(rootView: PaletteView(model: model))
         // Coins arrondis au niveau de la fenêtre : l'ombre système suit alors la forme arrondie, sans coins carrés.
         hosting.wantsLayer = true
-        hosting.layer?.cornerRadius = 26
+        hosting.layer?.cornerRadius = Prefs.paletteRadius(UserDefaults.standard.string(forKey: Prefs.styleKey) ?? "glass")
         hosting.layer?.cornerCurve = .continuous
         hosting.layer?.masksToBounds = true
         panel.contentView = hosting
@@ -154,7 +154,10 @@ final class AppController: NSObject, NSApplicationDelegate {
 
     /// L'ombre de la fenêtre est calculée une fois : après un changement de taille ou d'affichage, il faut la recalculer.
     private func refreshShadow() {
-        DispatchQueue.main.async { [panel] in panel?.invalidateShadow() }
+        DispatchQueue.main.async { [panel] in
+            panel?.contentView?.layer?.cornerRadius = Prefs.paletteRadius(UserDefaults.standard.string(forKey: Prefs.styleKey) ?? "glass")
+            panel?.invalidateShadow()
+        }
     }
 
     private func hidePanel() {

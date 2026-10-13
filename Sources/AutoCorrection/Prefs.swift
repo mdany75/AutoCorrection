@@ -5,6 +5,9 @@ enum Prefs {
     static let modelKey = "model"
     static let replaceKey = "replaceSelection"
     static let hideIconKey = "hideMenuBarIcon"
+    static let styleKey = "paletteStyle"
+    /// Rayon des coins de la palette selon le style (« standard » ou « glass »).
+    static func paletteRadius(_ style: String) -> CGFloat { style == "standard" ? 14 : 30 }
 
     static let hotKeyCodeKey = "hotKeyCode"
     static let hotKeyModsKey = "hotKeyMods"

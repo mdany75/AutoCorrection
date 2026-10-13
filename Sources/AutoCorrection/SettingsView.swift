@@ -40,6 +40,7 @@ struct SettingsView: View {
     @AppStorage(Prefs.effortKey) private var effort = "low"
     @AppStorage(Prefs.replaceKey) private var replace = true
     @AppStorage(Prefs.hideIconKey) private var hideIcon = false
+    @AppStorage(Prefs.styleKey) private var style = "glass"
     @StateObject private var state = SettingsState()
 
     var body: some View {
@@ -97,6 +98,10 @@ struct SettingsView: View {
             }
             Section("Comportement") {
                 ShortcutRecorder()
+                Picker("Style de la palette", selection: $style) {
+                    Text("Liquid Glass").tag("glass")
+                    Text("Standard").tag("standard")
+                }
                 Toggle("Remplacer le texte sélectionné par le résultat", isOn: $replace)
                 Toggle("Ouvrir AutoCorrection au démarrage du Mac",
                        isOn: Binding(get: { state.launchAtLogin }, set: { state.setLaunchAtLogin($0) }))
