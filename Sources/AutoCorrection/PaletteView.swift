@@ -31,12 +31,10 @@ struct PaletteView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            Divider()
             content
         }
         .frame(width: 440)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.separator))
+        .modifier(GlassPanel())
     }
 
     private var isListening: Bool {
@@ -65,7 +63,7 @@ struct PaletteView: View {
                 Text(model.selection)
                     .lineLimit(3)
                     .truncationMode(.tail)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.primary)
             }
             Spacer(minLength: 0)
             if !isWorking {
@@ -86,18 +84,21 @@ struct PaletteView: View {
     private var content: some View {
         switch model.phase {
         case .idle:
-            VStack(spacing: 2) {
-                if model.selection.isEmpty { dictateRow("Dicter un texte", highlighted: true) }
-                VStack(spacing: 2) {
-                    row(.correct, key: .return, mods: [])
-                    row(.polish, key: .return, mods: .command)
-                    row(.email, key: .return, mods: .option)
+            let hasText = !model.selection.isEmpty
+            VStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    tile(model.fromDictation ? "Redicter" : "Dicter", icon: "microphone", shortcut: "Espace",
+                         prominent: !hasText, enabled: !hasText || model.fromDictation) { model.onDictate() }
+                        .keyboardShortcut(.space, modifiers: [])
+                    tile(.correct, key: .return, mods: [], prominent: hasText)
+                    tile(.polish, key: .return, mods: .command, prominent: false)
+                    tile(.email, key: .return, mods: .option, prominent: false)
                 }
-                .disabled(model.selection.isEmpty)
-                if model.fromDictation { dictateRow("Redicter", highlighted: false) }
+                .padding(.horizontal, 12)
+                .padding(.top, 10)
+                .padding(.bottom, 8)
+                footer
             }
-            .padding(6)
-            footer
         case .listening:
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 12) {
@@ -119,6 +120,12 @@ struct PaletteView: View {
                     Button { model.onFinishDictation() } label: { Label("Terminer", systemImage: "stop.fill") }
                         .keyboardShortcut(.defaultAction)
                     Button("Annuler") { model.onCancelDictation() }
+                    Spacer()
+                    Text("Espace ou ⏎ pour terminer").font(.system(size: 11)).foregroundStyle(.tertiary)
+                    // Espace arrête aussi la dictée (bouton invisible, même action que « Terminer »).
+                    Button("") { model.onFinishDictation() }
+                        .keyboardShortcut(.space, modifiers: [])
+                        .frame(width: 0, height: 0).opacity(0).accessibilityHidden(true)
                 }
             }
             .padding(14)
@@ -160,44 +167,74 @@ struct PaletteView: View {
         .padding(.top, 2)
     }
 
-    private func dictateRow(_ title: String, highlighted: Bool) -> some View {
-        Button { model.onDictate() } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "microphone").frame(width: 18)
-                Text(title)
-                Spacer()
+    private func tile(_ title: String, icon: String, shortcut: String, prominent: Bool, enabled: Bool,
+                      action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 5) {
+                Image(systemName: icon).font(.system(size: 24))
+                Text(title).font(.system(size: 11, weight: .medium))
+                Text(shortcut).font(.system(size: 11)).opacity(0.6)
             }
-            .font(.system(size: 13))
-            .foregroundStyle(highlighted ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .contentShape(Rectangle())
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .buttonStyle(RowStyle())
+        .buttonStyle(TileStyle(prominent: prominent))
+        .aspectRatio(1, contentMode: .fit)
+        .disabled(!enabled)
     }
 
-    private func row(_ action: TextAction, key: KeyEquivalent, mods: EventModifiers) -> some View {
-        Button { model.onRun(action) } label: {
-            HStack(spacing: 10) {
-                Image(systemName: action.icon).frame(width: 18)
-                Text(action.title)
-                Spacer()
-                Text(action.shortcutLabel).foregroundStyle(.tertiary)
-            }
-            .font(.system(size: 13))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(RowStyle())
-        .keyboardShortcut(key, modifiers: mods)
+    private func tile(_ action: TextAction, key: KeyEquivalent, mods: EventModifiers, prominent: Bool) -> some View {
+        tile(action.shortTitle, icon: action.icon, shortcut: action.shortcutLabel, prominent: prominent,
+             enabled: !model.selection.isEmpty) { model.onRun(action) }
+            .keyboardShortcut(key, modifiers: mods)
     }
 }
 
-private struct RowStyle: ButtonStyle {
+/// Fond « verre » : Liquid Glass sur macOS 26, flou teinté avant. Sombre en mode sombre, son négatif en mode clair.
+private struct GlassPanel: ViewModifier {
+    @Environment(\.colorScheme) private var scheme
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 26, style: .continuous)
+        let dark = scheme == .dark
+        let tint = dark ? Color(red: 0.08, green: 0.09, blue: 0.12).opacity(0.45) : Color.white.opacity(0.55)
+        if #available(macOS 26, *) {
+            content.glassEffect(.regular.tint(tint), in: shape)
+        } else {
+            content
+                .background(tint, in: shape)
+                .background(.ultraThinMaterial, in: shape)
+                .overlay(shape.strokeBorder(Color.white.opacity(dark ? 0.22 : 0.85)))
+        }
+    }
+}
+
+/// Gros carré : voile clair en mode sombre, voile sombre en mode clair ; le bouton principal reste bleu.
+private struct TileStyle: ButtonStyle {
+    let prominent: Bool
+
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .background(configuration.isPressed ? Color.primary.opacity(0.12) : Color.clear,
-                        in: RoundedRectangle(cornerRadius: 8))
+        TileBody(configuration: configuration, prominent: prominent)
+    }
+
+    private struct TileBody: View {
+        let configuration: Configuration
+        let prominent: Bool
+        @Environment(\.colorScheme) private var scheme
+        @Environment(\.isEnabled) private var enabled
+
+        var body: some View {
+            let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
+            let dark = scheme == .dark
+            let fill: Color = prominent ? Color(red: 0.24, green: 0.55, blue: 1).opacity(0.5)
+                : dark ? .white.opacity(0.1) : Color(red: 0.08, green: 0.09, blue: 0.12).opacity(0.07)
+            let stroke: Color = prominent ? Color(red: 0.47, green: 0.69, blue: 1).opacity(0.75)
+                : dark ? .white.opacity(0.2) : Color(red: 0.08, green: 0.09, blue: 0.12).opacity(0.14)
+            configuration.label
+                .foregroundStyle(prominent ? AnyShapeStyle(Color.white) : AnyShapeStyle(.primary))
+                .background(fill, in: shape)
+                .overlay(shape.strokeBorder(stroke))
+                .opacity(enabled ? 1 : 0.5)
+                .scaleEffect(configuration.isPressed ? 0.97 : 1)
+        }
     }
 }

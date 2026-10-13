@@ -9,6 +9,7 @@ final class Dictation {
     private var task: SFSpeechRecognitionTask?
     private(set) var text = ""
     private var running = false
+    private var tapInstalled = false
 
     private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "fr-CA"))
         ?? SFSpeechRecognizer(locale: Locale(identifier: "fr-FR"))
@@ -33,6 +34,8 @@ final class Dictation {
             throw NSError(domain: "AutoCorrection", code: 1, userInfo: [
                 NSLocalizedDescriptionKey: "La reconnaissance vocale en français n'est pas disponible sur ce Mac."])
         }
+        // Sans micro, toucher à `inputNode` ou poser un tap lève une exception Objective-C (format à 0 Hz) qui tue l'app.
+        guard AVCaptureDevice.default(for: .audio) != nil else { throw Dictation.noMicrophone }
         cancel()
         text = ""
 
@@ -44,6 +47,7 @@ final class Dictation {
 
         let input = engine.inputNode
         let format = input.outputFormat(forBus: 0)
+        guard format.sampleRate > 0, format.channelCount > 0 else { request = nil; throw Dictation.noMicrophone }
         input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
             req.append(buffer)
             var level: Float = 0
@@ -55,8 +59,9 @@ final class Dictation {
             }
             DispatchQueue.main.async { onLevel(level) }
         }
+        tapInstalled = true
         engine.prepare()
-        try engine.start()
+        do { try engine.start() } catch { stopEngine(); request = nil; throw error }
         running = true
 
         task = recognizer.recognitionTask(with: req) { [weak self] result, error in
@@ -92,7 +97,12 @@ final class Dictation {
     }
 
     private func stopEngine() {
+        guard tapInstalled else { return }
         if engine.isRunning { engine.stop() }
         engine.inputNode.removeTap(onBus: 0)
+        tapInstalled = false
     }
+
+    private static let noMicrophone = NSError(domain: "AutoCorrection", code: 2, userInfo: [
+        NSLocalizedDescriptionKey: "Aucun microphone n'est disponible. Branchez-en un (ou choisissez une entrée dans Réglages Système > Son), puis réessayez."])
 }

@@ -4,6 +4,7 @@ import Security
 enum Prefs {
     static let modelKey = "model"
     static let replaceKey = "replaceSelection"
+    static let hideIconKey = "hideMenuBarIcon"
 
     static let hotKeyCodeKey = "hotKeyCode"
     static let hotKeyModsKey = "hotKeyMods"

@@ -7,8 +7,9 @@ Petite app Mac, dans la barre de menus, qui corrige, rend professionnel ou réé
 ## Fonctions
 
 - Raccourci global (⌥Espace par défaut, modifiable dans les réglages) qui ouvre une palette flottante sur le texte sélectionné.
-- Trois actions : corriger seulement (↵), corriger et rendre professionnel (⌘↵), réécrire en courriel (⌥↵, style professionnel standard, français québécois, sans signature).
-- Dictée vocale : sans texte sélectionné, « Dicter un texte » transcrit votre voix en direct (français), puis les trois actions s'appliquent au texte dicté.
+- Palette en verre (Liquid Glass sur macOS 26), claire ou sombre selon le Mac, avec quatre gros carrés : Dicter (Espace), Corriger (↵), Pro (⌘↵, corriger et rendre professionnel) et Courriel (⌥↵, style professionnel standard, français québécois, sans signature).
+- Dictée vocale : sans texte sélectionné, Dicter (Espace) transcrit votre voix en direct (français) ; Espace l'arrête, puis les trois actions s'appliquent au texte dicté. Sans microphone, un message s'affiche.
+- Réglages : ouverture au démarrage du Mac et option pour cacher l'icône de la barre des menus (rouvrir l'app ouvre les réglages).
 - Menu « Rechercher les mises à jour… » : installe la dernière version publiée sur GitHub, après vérification de la signature.
 - La palette se ferme avec le bouton ×, par un clic en dehors, ou avec Esc.
 - Le résultat remplace la sélection, ou va dans le presse-papiers selon le réglage.

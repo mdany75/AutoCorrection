@@ -1,3 +1,4 @@
+import ServiceManagement
 import SwiftUI
 
 @MainActor
@@ -8,6 +9,19 @@ final class SettingsState: ObservableObject {
     @Published var loggedIn: Bool?
     @Published var loginBusy = false
     @Published var loginError: String?
+    @Published var launchAtLogin = SMAppService.mainApp.status == .enabled
+    @Published var launchError: String?
+
+    func setLaunchAtLogin(_ on: Bool) {
+        launchError = nil
+        do {
+            if on { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
+        } catch { launchError = error.localizedDescription }
+        launchAtLogin = SMAppService.mainApp.status == .enabled
+        if on && SMAppService.mainApp.status == .requiresApproval {
+            launchError = "Autorisez AutoCorrection dans Réglages Système > Général > Ouverture."
+        }
+    }
 
     func refreshLogin() async { loggedIn = await ClaudeCodeClient.isLoggedIn() }
 
@@ -25,6 +39,7 @@ struct SettingsView: View {
     @AppStorage(Prefs.modelKey) private var model = ""
     @AppStorage(Prefs.effortKey) private var effort = "low"
     @AppStorage(Prefs.replaceKey) private var replace = true
+    @AppStorage(Prefs.hideIconKey) private var hideIcon = false
     @StateObject private var state = SettingsState()
 
     var body: some View {
@@ -83,6 +98,16 @@ struct SettingsView: View {
             Section("Comportement") {
                 ShortcutRecorder()
                 Toggle("Remplacer le texte sélectionné par le résultat", isOn: $replace)
+                Toggle("Ouvrir AutoCorrection au démarrage du Mac",
+                       isOn: Binding(get: { state.launchAtLogin }, set: { state.setLaunchAtLogin($0) }))
+                if let e = state.launchError {
+                    Text(e).font(.footnote).foregroundStyle(.red)
+                }
+                Toggle("Cacher l'icône de la barre des menus", isOn: $hideIcon)
+                if hideIcon {
+                    Text("Le raccourci reste actif. Pour retrouver ces réglages, rouvrez AutoCorrection depuis Applications ou Spotlight.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
             }
             Section("Autorisation macOS") {
                 HStack {

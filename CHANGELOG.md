@@ -1,5 +1,15 @@
 # Changements
 
+## 1.9 — 2026-10-13
+### Ajouté
+- Palette refaite en verre (Liquid Glass sur macOS 26, flou teinté avant) : quatre gros carrés (Dicter, Corriger, Pro, Courriel) avec leur raccourci. Sombre en mode sombre, son négatif en mode clair ; le bouton principal reste bleu.
+- Espace lance la dictée quand la palette est ouverte, et l'arrête (comme « Terminer »).
+- Réglages : « Ouvrir AutoCorrection au démarrage du Mac ».
+- Réglages : « Cacher l'icône de la barre des menus ». Le raccourci reste actif ; rouvrir l'app depuis Applications ou Spotlight ouvre les réglages.
+
+### Corrigé
+- Dicter sans microphone fermait l'app : un message d'erreur s'affiche maintenant.
+
 ## 1.8 — 2026-10-13
 ### Ajouté
 - Menu de mise à jour : « Rechercher les mises à jour… » dans le menu de la barre de menus, avec le numéro de version affiché. L'app compare avec la dernière Release GitHub, affiche les nouveautés et, après confirmation, télécharge, vérifie la signature (même développeur, notarisée), remplace l'app et la relance.

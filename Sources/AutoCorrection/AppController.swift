@@ -24,6 +24,10 @@ final class AppController: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         setupStatusItem()
         setupPanel()
+        applyIconVisibility()
+        NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.applyIconVisibility() }
+        }
 
         HotKeyCenter.apply = { [weak self] code, mods in self?.registerHotKey(code: code, mods: mods) ?? false }
         let saved = Prefs.hotKey
@@ -33,6 +37,17 @@ final class AppController: NSObject, NSApplicationDelegate {
 
         if !Clipboard.isTrusted { Clipboard.promptForAccess() }
         if !Prefs.usesClaudeCode, Keychain.read()?.isEmpty != false { openSettings() }
+    }
+
+    private func applyIconVisibility() {
+        let visible = !UserDefaults.standard.bool(forKey: Prefs.hideIconKey)
+        if statusItem.isVisible != visible { statusItem.isVisible = visible }
+    }
+
+    /// Icône cachée : rouvrir l'app (Finder, Spotlight) ouvre les réglages, d'où on peut la remontrer.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        openSettings()
+        return true
     }
 
     /// Remplace le raccourci actif. En cas d'échec, l'ancien reste en place.

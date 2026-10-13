@@ -13,10 +13,18 @@ enum TextAction: CaseIterable, Identifiable {
         }
     }
 
+    var shortTitle: String {
+        switch self {
+        case .correct: "Corriger"
+        case .polish: "Pro"
+        case .email: "Courriel"
+        }
+    }
+
     var icon: String {
         switch self {
         case .correct: "checkmark"
-        case .polish: "wand.and.stars"
+        case .polish: "briefcase"
         case .email: "envelope"
         }
     }
