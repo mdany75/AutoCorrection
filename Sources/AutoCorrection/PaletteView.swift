@@ -22,6 +22,7 @@ final class PaletteModel {
     var onRun: (TextAction) -> Void = { _ in }
     var onClose: () -> Void = {}
     var onSettings: () -> Void = {}
+    var onTextChange: () -> Void = {}
 
     func pushLevel(_ l: Float) { levels.removeFirst(); levels.append(l) }
 }
@@ -35,32 +36,35 @@ enum PaletteLayout {
     static let maxTextHeight: CGFloat = 12 * NSLayoutManager().defaultLineHeight(for: selectionFont)
 }
 
-/// Texte sélectionné : la zone prend la hauteur du texte jusqu'à 12 lignes, puis défile.
+/// Texte sélectionné, modifiable avant l'action : la zone grandit avec le texte jusqu'à 12 lignes, puis défile.
 private struct SelectionText: View {
-    let text: String
+    @Bindable var model: PaletteModel
+    var focused: FocusState<Bool>.Binding
 
     private var height: CGFloat {
-        let h = (text as NSString).boundingRect(
-            with: CGSize(width: PaletteLayout.textWidth, height: .greatestFiniteMagnitude),
+        let h = (model.selection as NSString).boundingRect(
+            with: CGSize(width: PaletteLayout.textWidth - 40, height: .greatestFiniteMagnitude),
             options: [.usesLineFragmentOrigin, .usesFontLeading],
             attributes: [.font: PaletteLayout.selectionFont]).height
-        return min(ceil(h) + 2, PaletteLayout.maxTextHeight)
+        return min(ceil(h) + 2, PaletteLayout.maxTextHeight) + 8
     }
 
     var body: some View {
-        ScrollView(.vertical) {
-            Text(text)
-                .font(.system(size: 13))
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .frame(height: height)
+        TextEditor(text: $model.selection)
+            .font(.system(size: 13))
+            .scrollContentBackground(.hidden)
+            .focused(focused)
+            .scrollIndicators(height >= PaletteLayout.maxTextHeight + 8 ? .automatic : .never)
+            .frame(height: height)
+            .padding(.leading, -5)
+            .padding(.vertical, -4)
     }
 }
 
 struct PaletteView: View {
     let model: PaletteModel
     @AppStorage(Prefs.styleKey) private var style = "glass"
+    @FocusState private var editing: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -69,6 +73,7 @@ struct PaletteView: View {
         }
         .frame(width: PaletteLayout.width)
         .modifier(WindowDrag())
+        .onChange(of: model.selection) { model.onTextChange() }
         .modifier(PanelBackground(glass: style != "standard"))
     }
 
@@ -95,7 +100,7 @@ struct PaletteView: View {
                 Text("Aucun texte sélectionné. Sélectionnez du texte, ou dictez-le.")
                     .foregroundStyle(.secondary)
             } else {
-                SelectionText(text: model.selection)
+                SelectionText(model: model, focused: $editing)
             }
             Spacer(minLength: 0)
             if !isWorking {
@@ -121,7 +126,7 @@ struct PaletteView: View {
                 HStack(spacing: 12) {
                     tile(model.fromDictation ? "Redicter" : "Dicter", icon: "microphone", shortcut: "Espace",
                          enabled: !hasText || model.fromDictation, main: !hasText) { model.onDictate() }
-                        .keyboardShortcut(.space, modifiers: [])
+                        .keyboardShortcut(editing ? nil : KeyboardShortcut(.space, modifiers: []))
                     tile(.correct, key: .return, mods: [], main: hasText)
                     tile(.polish, key: .return, mods: .command, main: false)
                     tile(.email, key: .return, mods: .option, main: false)
@@ -188,7 +193,7 @@ struct PaletteView: View {
 
     private var footer: some View {
         HStack {
-            Text("Esc pour fermer")
+            Text(editing ? "⇧↵ : saut de ligne  ·  Esc pour fermer" : "Esc pour fermer")
             Spacer()
             Text(Prefs.replaceSelection ? "Le résultat remplace la sélection" : "Le résultat va dans le presse-papiers")
         }

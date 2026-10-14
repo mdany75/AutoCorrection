@@ -1,5 +1,9 @@
 # Changements
 
+## 1.11 — 2026-10-13
+### Ajouté
+- Le texte sélectionné est modifiable dans la palette avant de cliquer sur une action ; les actions s'appliquent au texte modifié. Entrée corrige, ⇧↵ fait un saut de ligne. Pendant l'édition, Espace écrit une espace au lieu de lancer la dictée.
+
 ## 1.10 — 2026-10-13
 ### Ajouté
 - Réglages : « Style de la palette », Liquid Glass (par défaut) ou Standard. Liquid Glass : verre de macOS 26 sur le panneau et les carrés, l'action principale plus lumineuse ; flou teinté sur macOS 14 et 15. Standard : matériau flou classique et carrés blancs.

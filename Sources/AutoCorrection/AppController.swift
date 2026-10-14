@@ -95,6 +95,7 @@ final class AppController: NSObject, NSApplicationDelegate {
         model.onDictate = { [weak self] in self?.startDictation() }
         model.onFinishDictation = { [weak self] in Task { @MainActor in await self?.finishDictation() } }
         model.onCancelDictation = { [weak self] in self?.cancelDictation() }
+        model.onTextChange = { [weak self] in self?.fitPanel() }
         model.onSettings = { [weak self] in self?.hidePanel(); self?.openSettings() }
 
         panel = PalettePanel(contentRect: NSRect(x: 0, y: 0, width: PaletteLayout.width, height: 200),
