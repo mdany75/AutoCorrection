@@ -1,5 +1,9 @@
 # Changements
 
+## 1.13.1 — 2026-10-15
+### Corrigé
+- La dictée ne captait plus rien après avoir mis ou retiré des écouteurs, jusqu'au relancement de l'app : le moteur audio restait lié au micro du lancement. Chaque dictée prend maintenant le micro du moment, et un changement de micro pendant l'écoute est repris sans perdre les mots déjà reconnus.
+
 ## 1.13 — 2026-10-15
 ### Modifié
 - Palette : cinq carrés, les mêmes que les presets : Correction (↵), Personnel (⌃↵), Pro (⌘↵), TI (⇧⌘↵) et Courriel (⌥↵). Leur consigne se modifie dans les réglages (onglet Dictée) et sert aussi à la dictée sans palette.
