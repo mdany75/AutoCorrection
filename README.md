@@ -20,6 +20,8 @@ Petite app Mac, dans la barre de menus, qui corrige ou réécrit (style personne
 - Deux moteurs au choix : une clé API Anthropic, ou la commande `claude` de Claude Code (forfait Max, sans clé API).
 - Clé API conservée dans le Trousseau ; modèle (Haiku 5.5, Sonnet 5.5 ou Opus 5.5), niveau de réflexion (faible par défaut) configurables.
 
+![Réglages d'AutoCorrection, onglet Dictée](docs/reglages-dictee.png)
+
 ## Installer
 
 Télécharge [AutoCorrection.dmg](https://github.com/mdany75/AutoCorrection/releases/latest/download/AutoCorrection.dmg) (toujours la dernière version), ouvre-le, puis glisse AutoCorrection dans Applications.
