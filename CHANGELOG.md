@@ -1,5 +1,9 @@
 # Changements
 
+## 1.13.2 — 2026-10-15
+### Corrigé
+- Dictée : juste après le retrait ou le branchement d'écouteurs, macOS peut encore désigner l'ancien micro pendant un instant (erreur 560227702). La dictée attend un moment et réessaie, au départ comme pendant l'écoute ; si le micro ne répond toujours pas, le message l'explique en français au lieu du seul code d'erreur.
+
 ## 1.13.1 — 2026-10-15
 ### Corrigé
 - La dictée ne captait plus rien après avoir mis ou retiré des écouteurs, jusqu'au relancement de l'app : le moteur audio restait lié au micro du lancement. Chaque dictée prend maintenant le micro du moment, et un changement de micro pendant l'écoute est repris sans perdre les mots déjà reconnus.

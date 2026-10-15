@@ -309,7 +309,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if let err = await Dictation.authorize() { quickFailed(err); return }
             quickText = ""
             do {
-                try quickDictation.start(
+                try await quickDictation.start(
                     onText: { [weak self] text in
                         guard let self, text != quickText else { return }
                         quickText = text

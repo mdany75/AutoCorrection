@@ -19,6 +19,9 @@ final class Dictation {
     /// Changements de micro pendant l'écoute ; au-delà de `maxRestarts`, l'écoute s'arrête sur une erreur.
     private var restarts = 0
     private static let maxRestarts = 5
+    /// Essais pour brancher un moteur, espacés de `retryDelay`.
+    private static let engineAttempts = 4
+    private static let retryDelay = Duration.milliseconds(400)
 
     private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "fr-CA"))
         ?? SFSpeechRecognizer(locale: Locale(identifier: "fr-FR"))
@@ -38,7 +41,7 @@ final class Dictation {
     }
 
     func start(onText: @escaping (String) -> Void, onLevel: @escaping (Float) -> Void,
-               onError: @escaping (String) -> Void) throws {
+               onError: @escaping (String) -> Void) async throws {
         guard let recognizer, recognizer.isAvailable else {
             throw NSError(domain: "AutoCorrection", code: 1, userInfo: [
                 NSLocalizedDescriptionKey: "La reconnaissance vocale en français n'est pas disponible sur ce Mac."])
@@ -57,7 +60,7 @@ final class Dictation {
         if recognizer.supportsOnDeviceRecognition { req.requiresOnDeviceRecognition = true }
         request = req
 
-        do { try startEngine(feeding: req) } catch { request = nil; requestFormat = nil; throw error }
+        do { try await startEngineRetrying(feeding: req) } catch { request = nil; requestFormat = nil; throw error }
         running = true
 
         task = recognizer.recognitionTask(with: req) { [weak self] result, error in
@@ -77,8 +80,11 @@ final class Dictation {
     /// Arrête l'écoute, laisse arriver les derniers mots reconnus et renvoie le texte.
     func finish() async -> String {
         stopEngine()
-        request?.endAudio()
+        let req = request
+        request = nil // une reprise de micro encore en attente n'a plus rien à alimenter
+        req?.endAudio()
         try? await Task.sleep(for: .milliseconds(800))
+        withExtendedLifetime(req) {} // la requête vit jusqu'aux derniers mots reconnus
         let result = text.trimmingCharacters(in: .whitespacesAndNewlines)
         cancel()
         return result
@@ -107,7 +113,6 @@ final class Dictation {
             guard let c = AVAudioConverter(from: format, to: target) else { throw Dictation.lostMicrophone }
             converter = c
         }
-        requestFormat = target
 
         let onLevel = self.onLevel
         input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
@@ -138,6 +143,24 @@ final class Dictation {
         }
         engine.prepare()
         do { try engine.start() } catch { stopEngine(); throw error }
+        requestFormat = target
+    }
+
+    /// Branche un moteur neuf, en réessayant un instant : juste après un branchement ou un retrait d'écouteurs,
+    /// macOS peut encore désigner l'ancien micro (erreur CoreAudio 560227702, « !dev »).
+    private func startEngineRetrying(feeding req: SFSpeechAudioBufferRecognitionRequest) async throws {
+        var attempt = 1
+        while true {
+            guard request === req else { throw CancellationError() }
+            do {
+                try startEngine(feeding: req)
+                return
+            } catch {
+                guard attempt < Dictation.engineAttempts else { throw Dictation.readable(error) }
+                attempt += 1
+                try? await Task.sleep(for: Dictation.retryDelay)
+            }
+        }
     }
 
     /// Micro changé pendant l'écoute : un moteur neuf reprend sur la nouvelle entrée, la requête continue
@@ -146,12 +169,18 @@ final class Dictation {
         guard running, let req = request else { return }
         stopEngine()
         restarts += 1
-        do {
-            guard AVCaptureDevice.default(for: .audio) != nil else { throw Dictation.noMicrophone }
-            guard restarts <= Dictation.maxRestarts else { throw Dictation.lostMicrophone }
-            try startEngine(feeding: req)
-        } catch {
-            onError(error.localizedDescription)
+        guard restarts <= Dictation.maxRestarts else { onError(Dictation.lostMicrophone.localizedDescription); return }
+        Task { @MainActor [weak self] in
+            // Laisse à macOS le temps de désigner le nouveau micro.
+            try? await Task.sleep(for: Dictation.retryDelay)
+            guard let self, self.running, self.request === req else { return }
+            do {
+                guard AVCaptureDevice.default(for: .audio) != nil else { throw Dictation.noMicrophone }
+                try await self.startEngineRetrying(feeding: req)
+            } catch {
+                guard self.running, self.request === req else { return }
+                self.onError(error.localizedDescription)
+            }
         }
     }
 
@@ -183,6 +212,14 @@ final class Dictation {
 
     private static let noMicrophone = NSError(domain: "AutoCorrection", code: 2, userInfo: [
         NSLocalizedDescriptionKey: "Aucun microphone n'est disponible. Branchez-en un (ou choisissez une entrée dans Réglages Système > Son), puis réessayez."])
+
+    /// Erreur brute de CoreAudio : message lisible, le code gardé pour le diagnostic.
+    private static func readable(_ error: Error) -> Error {
+        let e = error as NSError
+        guard e.domain != "AutoCorrection" else { return error }
+        return NSError(domain: "AutoCorrection", code: 4, userInfo: [NSLocalizedDescriptionKey:
+            "Le microphone ne répond pas (écouteurs branchés ou retirés à l'instant ?). Réessayez dans un moment. (Erreur \(e.code))"])
+    }
 
     private static let lostMicrophone = NSError(domain: "AutoCorrection", code: 3, userInfo: [
         NSLocalizedDescriptionKey: "Le microphone a changé pendant la dictée et n'a pas pu être repris. Relancez la dictée."])
