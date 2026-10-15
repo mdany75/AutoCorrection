@@ -20,7 +20,11 @@ enum ClaudeError: LocalizedError {
 
 enum ClaudeClient {
     static func run(_ action: TextAction, on text: String) async throws -> String {
-        if Prefs.usesClaudeCode { return try await ClaudeCodeClient.run(action, on: text) }
+        try await run(system: action.systemPrompt(), on: text)
+    }
+
+    static func run(system: String, on text: String) async throws -> String {
+        if Prefs.usesClaudeCode { return try await ClaudeCodeClient.run(system: system, on: text) }
         guard let key = Keychain.read(), !key.isEmpty else { throw ClaudeError.noKey }
 
         var req = URLRequest(url: URL(string: "https://api.anthropic.com/v1/messages")!)
@@ -34,7 +38,7 @@ enum ClaudeClient {
             "model": Prefs.model,
             "max_tokens": 4096,
             "output_config": ["effort": Prefs.effort],
-            "system": action.systemPrompt(),
+            "system": system,
             "messages": [["role": "user", "content": "<texte>\n\(text)\n</texte>"]]
         ]
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -65,10 +69,10 @@ enum ClaudeCodeClient {
             .first { FileManager.default.isExecutableFile(atPath: $0) }
     }
 
-    static func run(_ action: TextAction, on text: String) async throws -> String {
+    static func run(system: String, on text: String) async throws -> String {
         guard let exe = locate() else { throw ClaudeError.noClaudeCode }
         let args = ["-p", "--model", Prefs.model, "--effort", Prefs.effort, "--tools", "",
-                    "--system-prompt", action.systemPrompt(),
+                    "--system-prompt", system,
                     "--no-session-persistence", "--disable-slash-commands",
                     "--setting-sources", "", "--strict-mcp-config"]
         let input = "<texte>\n\(text)\n</texte>"

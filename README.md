@@ -10,7 +10,10 @@ Petite app Mac, dans la barre de menus, qui corrige, rend professionnel ou réé
 - Palette claire ou sombre selon le Mac, au style Liquid Glass (macOS 26) ou Standard au choix dans les réglages, avec quatre gros carrés : Dicter (Espace), Corriger (↵), Pro (⌘↵, corriger et rendre professionnel) et Courriel (⌥↵, style professionnel standard, français québécois, sans signature).
 - Le texte sélectionné s'affiche en entier et se modifie avant l'action (⇧↵ pour un saut de ligne) : la zone grandit jusqu'à 12 lignes, puis défile.
 - Dictée vocale : sans texte sélectionné, Dicter (Espace) transcrit votre voix en direct (français) ; Espace l'arrête, puis les trois actions s'appliquent au texte dicté. Sans microphone, un message s'affiche.
-- Réglages : ouverture au démarrage du Mac et option pour cacher l'icône de la barre des menus (rouvrir l'app ouvre les réglages).
+- Dictée sans palette : un deuxième raccourci (⌃⌥⌘D par défaut) lance l'écoute sans aucune fenêtre. Un nouvel appui l'arrête, ou un silence de 3, 5, 7 ou 10 secondes selon le réglage, puis le texte s'écrit à l'emplacement du curseur. Esc annule. Un son marque le début et la fin, et l'icône de la barre des menus devient un micro pendant l'écoute.
+- Avec une souris Logitech : dans Logi Options+, donnez à un bouton l'action « Raccourci clavier » ⌃⌥⌘D. Options+ envoie une frappe instantanée, pas un maintien : c'est pourquoi la dictée se lance et s'arrête par deux appuis plutôt qu'en tenant le bouton.
+- Presets de dictée : Correction (par défaut), Style personnel, Style professionnel, Courriel, Note TI, ou Brut (texte reconnu tel quel, sans IA). Nom et consigne modifiables dans l'onglet Dictée des réglages ; choix rapide dans le menu « Traitement de la dictée ».
+- Réglages en deux onglets. Général : moteur, raccourci de la palette, ouverture au démarrage du Mac, option pour cacher l'icône de la barre des menus (rouvrir l'app ouvre les réglages). Dictée : raccourci, traitement, arrêt de l'écoute, sons, durée maximale, presets.
 - Menu « Rechercher les mises à jour… » : installe la dernière version publiée sur GitHub, après vérification de la signature.
 - La palette se ferme avec le bouton ×, par un clic en dehors, ou avec Esc.
 - Le résultat remplace la sélection, ou va dans le presse-papiers selon le réglage.

@@ -1,5 +1,19 @@
 # Changements
 
+## 1.12 — 2026-10-15
+### Ajouté
+- Dictée sans palette : un deuxième raccourci (⌃⌥⌘D par défaut, modifiable) lance l'écoute sans aucune fenêtre. Elle s'arrête par un nouvel appui ou, au choix, après un silence de 3, 5, 7 ou 10 secondes ; le texte s'écrit alors à l'emplacement du curseur. Esc annule. Prévu pour un bouton de souris réglé dans Logi Options+ (action « Raccourci clavier »).
+- Pendant l'écoute : son de début et de fin (désactivables) ; l'icône de la barre des menus devient un micro, puis un sablier pendant le traitement, et s'affiche même si elle est cachée.
+- Presets de traitement de la dictée : Correction (par défaut), Style personnel, Style professionnel, Courriel, Note TI, ou Brut (sans IA). Nom et consigne modifiables, avec « Rétablir les presets d'origine ». Choix rapide dans le menu « Traitement de la dictée ».
+- Les consignes de dictée retirent les hésitations et les faux départs et appliquent les corrections dites à voix haute (« non, plutôt jeudi »). Une dictée en forme de question ou de demande est écrite, jamais répondue.
+- Durée maximale d'écoute réglable (1, 2 ou 5 minutes). Si Claude échoue, le texte reconnu est écrit tel quel et un message l'explique.
+
+### Modifié
+- Réglages en deux onglets : Général et Dictée.
+
+### Corrigé
+- Quand un nouveau raccourci était refusé (déjà pris par une autre app), l'ancien n'était pas rétabli et l'app restait sans raccourci.
+
 ## 1.11 — 2026-10-13
 ### Ajouté
 - Le texte sélectionné est modifiable dans la palette avant de cliquer sur une action ; les actions s'appliquent au texte modifié. Entrée corrige, ⇧↵ fait un saut de ligne. Pendant l'édition, Espace écrit une espace au lieu de lancer la dictée.

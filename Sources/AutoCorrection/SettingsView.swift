@@ -41,9 +41,28 @@ struct SettingsView: View {
     @AppStorage(Prefs.replaceKey) private var replace = true
     @AppStorage(Prefs.hideIconKey) private var hideIcon = false
     @AppStorage(Prefs.styleKey) private var style = "glass"
+    @AppStorage(Prefs.dictationPresetKey) private var dictationPreset = Preset.defaults[0].id
+    @AppStorage(Prefs.dictationSoundsKey) private var dictationSounds = true
+    @AppStorage(Prefs.dictationSilenceKey) private var dictationSilence = 0
+    @AppStorage(Prefs.dictationMaxKey) private var dictationMax = 2
+    @State private var presets = Prefs.presets
+    @State private var editedPreset = Preset.defaults[0].id
     @StateObject private var state = SettingsState()
 
     var body: some View {
+        TabView {
+            general.tabItem { Label("Général", systemImage: "gearshape") }
+            dictationSettings.tabItem { Label("Dictée", systemImage: "mic") }
+        }
+        .task(id: backend) { if backend == "claudeCode" { await state.refreshLogin() } }
+        .frame(width: 460)
+        .fixedSize(horizontal: false, vertical: true)
+        .onReceive(Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()) { _ in
+            state.trusted = Clipboard.isTrusted
+        }
+    }
+
+    private var general: some View {
         Form {
             Section("Connexion à Claude") {
                 Picker("Moteur", selection: $backend) {
@@ -97,7 +116,7 @@ struct SettingsView: View {
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Comportement") {
-                ShortcutRecorder()
+                ShortcutRecorder("Raccourci de la palette", kind: .palette)
                 Picker("Style de la palette", selection: $style) {
                     Text("Liquid Glass").tag("glass")
                     Text("Standard").tag("standard")
@@ -110,7 +129,7 @@ struct SettingsView: View {
                 }
                 Toggle("Cacher l'icône de la barre des menus", isOn: $hideIcon)
                 if hideIcon {
-                    Text("Le raccourci reste actif. Pour retrouver ces réglages, rouvrez AutoCorrection depuis Applications ou Spotlight.")
+                    Text("Les raccourcis restent actifs. Pour retrouver ces réglages, rouvrez AutoCorrection depuis Applications ou Spotlight.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
             }
@@ -129,12 +148,68 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .task(id: backend) { if backend == "claudeCode" { await state.refreshLogin() } }
-        .frame(width: 460)
-        .fixedSize(horizontal: false, vertical: true)
-        .onReceive(Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()) { _ in
-            state.trusted = Clipboard.isTrusted
+    }
+
+    private var dictationSettings: some View {
+        Form {
+            Section("Dictée sans palette") {
+                ShortcutRecorder("Raccourci de la dictée", kind: .dictation)
+                Text("Un appui lance l'écoute, sans fenêtre. Quand elle s'arrête, le texte s'écrit au curseur. Esc annule. Dans Logi Options+, assignez ce raccourci à un bouton de la souris (action « Raccourci clavier »).")
+                    .font(.footnote).foregroundStyle(.secondary)
+                Picker("Traitement", selection: presetChoice) {
+                    Text("Brut (sans IA)").tag(Preset.rawID)
+                    ForEach(presets) { Text($0.name).tag($0.id) }
+                }
+                Picker("Arrêt de l'écoute", selection: $dictationSilence) {
+                    Text("Nouvel appui sur le raccourci").tag(0)
+                    ForEach(Prefs.dictationSilences, id: \.self) { Text("Silence de \($0) secondes").tag($0) }
+                }
+                if dictationSilence > 0 {
+                    Text("Un nouvel appui arrête aussi l'écoute avant la fin du silence.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+                Toggle("Sons de début et de fin", isOn: $dictationSounds)
+                Picker("Durée maximale", selection: $dictationMax) {
+                    Text("1 minute").tag(1)
+                    Text("2 minutes").tag(2)
+                    Text("5 minutes").tag(5)
+                }
+            }
+            Section("Presets") {
+                Picker("Preset à modifier", selection: $editedPreset) {
+                    ForEach(presets) { Text($0.name.isEmpty ? "Sans nom" : $0.name).tag($0.id) }
+                }
+                if let i = presets.firstIndex(where: { $0.id == editedPreset }) {
+                    TextField("Nom", text: $presets[i].name)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Consigne")
+                        TextEditor(text: $presets[i].task)
+                            .font(.body)
+                            .frame(height: 110)
+                    }
+                }
+                HStack {
+                    Text("La consigne dit à Claude quoi faire du texte dicté.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Rétablir les presets d'origine") {
+                        Prefs.resetPresets()
+                        presets = Prefs.presets
+                    }
+                    .disabled(presets == Preset.defaults)
+                }
+            }
         }
+        .formStyle(.grouped)
+        .onChange(of: presets) { Prefs.savePresets(presets) }
+    }
+
+    /// Un preset supprimé ou inconnu retombe sur le premier de la liste.
+    private var presetChoice: Binding<String> {
+        Binding(get: {
+            dictationPreset == Preset.rawID || presets.contains { $0.id == dictationPreset }
+                ? dictationPreset : presets.first?.id ?? Preset.rawID
+        }, set: { dictationPreset = $0 })
     }
 
     private var modelChoice: Binding<String> {
