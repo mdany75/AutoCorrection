@@ -19,7 +19,6 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var settingsWindow: NSWindow?
     private let model = PaletteModel()
     private var busy = false
-    private let dictation = Dictation()
     private var outsideClickMonitor: Any?
 
     // Dictée sans palette
@@ -121,9 +120,6 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func setupPanel() {
         model.onRun = { [weak self] in self?.run($0) }
         model.onClose = { [weak self] in self?.hidePanel() }
-        model.onDictate = { [weak self] in self?.startDictation() }
-        model.onFinishDictation = { [weak self] in Task { @MainActor in await self?.finishDictation() } }
-        model.onCancelDictation = { [weak self] in self?.cancelDictation() }
         model.onTextChange = { [weak self] in self?.fitPanel() }
         model.onSettings = { [weak self] in self?.hidePanel(); self?.openSettings() }
 
@@ -191,7 +187,6 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func hidePanel() {
-        dictation.cancel()
         if let m = outsideClickMonitor { NSEvent.removeMonitor(m); outsideClickMonitor = nil }
         panel.orderOut(nil)
         model.phase = .idle
@@ -284,53 +279,9 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         busy = true
         model.phase = .idle
-        model.fromDictation = false
         model.selection = await Clipboard.captureSelection() ?? ""
         busy = false
         showPanel()
-    }
-
-    // MARK: - Dictée
-
-    private func startDictation() {
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            if let err = await Dictation.authorize() { model.phase = .error(err); fitPanel(); return }
-            model.transcript = ""
-            model.levels = [Float](repeating: 0, count: model.levels.count)
-            do {
-                try dictation.start(
-                    onText: { [weak self] in self?.model.transcript = $0 },
-                    onLevel: { [weak self] in self?.model.pushLevel($0) },
-                    onError: { [weak self] msg in
-                        self?.dictation.cancel()
-                        self?.model.phase = .error(msg)
-                        self?.fitPanel()
-                    })
-                model.phase = .listening
-            } catch {
-                model.phase = .error(error.localizedDescription)
-            }
-            fitPanel()
-        }
-    }
-
-    private func finishDictation() async {
-        let text = await dictation.finish()
-        if text.isEmpty {
-            model.phase = .error("Aucune parole détectée. Vérifiez le microphone et réessayez.")
-        } else {
-            model.selection = text
-            model.fromDictation = true
-            model.phase = .idle
-        }
-        fitPanel()
-    }
-
-    private func cancelDictation() {
-        dictation.cancel()
-        model.phase = .idle
-        fitPanel()
     }
 
     // MARK: - Dictée sans palette
@@ -410,7 +361,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
             var failure: String?
             let id = Prefs.dictationPresetID
             if id != Preset.rawID, let preset = Prefs.presets.first(where: { $0.id == id }) {
-                do { result = try await ClaudeClient.run(system: preset.systemPrompt(), on: text) }
+                do { result = try await ClaudeClient.run(system: preset.dictationPrompt(), on: text) }
                 catch { failure = error.localizedDescription }
             }
             guard !Task.isCancelled else { return }

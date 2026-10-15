@@ -175,7 +175,7 @@ struct SettingsView: View {
                     Text("5 minutes").tag(5)
                 }
             }
-            Section("Presets") {
+            Section("Presets de la palette et de la dictée") {
                 Picker("Preset à modifier", selection: $editedPreset) {
                     ForEach(presets) { Text($0.name.isEmpty ? "Sans nom" : $0.name).tag($0.id) }
                 }
@@ -189,7 +189,7 @@ struct SettingsView: View {
                     }
                 }
                 HStack {
-                    Text("La consigne dit à Claude quoi faire du texte dicté.")
+                    Text("Chaque preset sert à un carré de la palette et à la dictée.")
                         .font(.footnote).foregroundStyle(.secondary)
                     Spacer()
                     Button("Rétablir les presets d'origine") {

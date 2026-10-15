@@ -3,7 +3,6 @@ import SwiftUI
 
 enum PalettePhase: Equatable {
     case idle
-    case listening
     case working(TextAction)
     case copied
     case error(String)
@@ -12,24 +11,16 @@ enum PalettePhase: Equatable {
 @Observable @MainActor
 final class PaletteModel {
     var selection = ""
-    var fromDictation = false
-    var transcript = ""
-    var levels = [Float](repeating: 0, count: 14)
     var phase: PalettePhase = .idle
-    var onDictate: () -> Void = {}
-    var onFinishDictation: () -> Void = {}
-    var onCancelDictation: () -> Void = {}
     var onRun: (TextAction) -> Void = { _ in }
     var onClose: () -> Void = {}
     var onSettings: () -> Void = {}
     var onTextChange: () -> Void = {}
-
-    func pushLevel(_ l: Float) { levels.removeFirst(); levels.append(l) }
 }
 
 enum PaletteLayout {
     static let width: CGFloat = 560
-    static let tile: CGFloat = 98
+    static let tile: CGFloat = 94
     static let selectionFont = NSFont.systemFont(ofSize: 13)
     /// Largeur du texte : palette moins marges, icône et bouton de fermeture.
     static let textWidth: CGFloat = width - 28 - 20 - 10 - 25
@@ -77,11 +68,6 @@ struct PaletteView: View {
         .modifier(PanelBackground(glass: style != "standard"))
     }
 
-    private var isListening: Bool {
-        if case .listening = model.phase { return true }
-        return false
-    }
-
     private var isWorking: Bool {
         if case .working = model.phase { return true }
         return false
@@ -89,15 +75,12 @@ struct PaletteView: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: model.fromDictation || isListening ? "microphone" : "sparkles")
+            Image(systemName: "sparkles")
                 .font(.system(size: 16))
                 .foregroundStyle(.tint)
                 .padding(.top, 2)
-            if case .listening = model.phase {
-                Text("Dictée en cours…")
-                    .foregroundStyle(.secondary)
-            } else if model.selection.isEmpty {
-                Text("Aucun texte sélectionné. Sélectionnez du texte, ou dictez-le.")
+            if model.selection.isEmpty {
+                Text("Aucun texte sélectionné. Sélectionnez du texte, ou dictez-le avec \(Prefs.hotKey(.dictation).label).")
                     .foregroundStyle(.secondary)
             } else {
                 SelectionText(model: model, focused: $editing)
@@ -121,14 +104,12 @@ struct PaletteView: View {
     private var content: some View {
         switch model.phase {
         case .idle:
-            let hasText = !model.selection.isEmpty
             VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    tile(model.fromDictation ? "Redicter" : "Dicter", icon: "microphone", shortcut: "Espace",
-                         enabled: !hasText || model.fromDictation, main: !hasText) { model.onDictate() }
-                        .keyboardShortcut(editing ? nil : KeyboardShortcut(.space, modifiers: []))
-                    tile(.correct, key: .return, mods: [], main: hasText)
+                HStack(spacing: 10) {
+                    tile(.correct, key: .return, mods: [], main: true)
+                    tile(.personal, key: .return, mods: .control, main: false)
                     tile(.polish, key: .return, mods: .command, main: false)
+                    tile(.ti, key: .return, mods: [.shift, .command], main: false)
                     tile(.email, key: .return, mods: .option, main: false)
                 }
                 .frame(maxWidth: .infinity)
@@ -136,36 +117,6 @@ struct PaletteView: View {
                 .padding(.bottom, 8)
                 footer
             }
-        case .listening:
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 12) {
-                    Image(systemName: "microphone.fill").foregroundStyle(.red)
-                    HStack(spacing: 3) {
-                        ForEach(model.levels.indices, id: \.self) { i in
-                            Capsule().fill(.tint).frame(width: 3, height: 4 + CGFloat(model.levels[i]) * 28)
-                        }
-                    }
-                    .frame(height: 32)
-                    .animation(.easeOut(duration: 0.1), value: model.levels)
-                    Spacer()
-                }
-                Text(model.transcript.isEmpty ? "Parlez…" : model.transcript)
-                    .font(.system(size: 14))
-                    .foregroundStyle(model.transcript.isEmpty ? .secondary : .primary)
-                    .frame(maxWidth: .infinity, minHeight: 48, alignment: .topLeading)
-                HStack {
-                    Button { model.onFinishDictation() } label: { Label("Terminer", systemImage: "stop.fill") }
-                        .keyboardShortcut(.defaultAction)
-                    Button("Annuler") { model.onCancelDictation() }
-                    Spacer()
-                    Text("Espace ou ⏎ pour terminer").font(.system(size: 11)).foregroundStyle(.tertiary)
-                    // Espace arrête aussi la dictée (bouton invisible, même action que « Terminer »).
-                    Button("") { model.onFinishDictation() }
-                        .keyboardShortcut(.space, modifiers: [])
-                        .frame(width: 0, height: 0).opacity(0).accessibilityHidden(true)
-                }
-            }
-            .padding(14)
         case .working(let action):
             HStack(spacing: 10) {
                 ProgressView().controlSize(.small)

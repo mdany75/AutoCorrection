@@ -1,6 +1,6 @@
 # CLAUDE.md — AutoCorrection
 
-App Mac en barre de menus (Swift/SwiftUI, SwiftPM, macOS 14+) qui envoie le texte sélectionné à l'API Anthropic pour le corriger, le rendre professionnel ou le réécrire en courriel.
+App Mac en barre de menus (Swift/SwiftUI, SwiftPM, macOS 14+) qui envoie le texte sélectionné, ou dicté, à Claude pour le corriger ou le réécrire selon cinq presets (Correction, Personnel, Pro, Note TI, Courriel).
 
 Ce projet suit le standard commun des projets de Dany (`/standard-projet` le vérifie).
 
@@ -28,8 +28,8 @@ Dans cet ordre :
 - Répondre et écrire (commits, README, textes de l'interface) en français.
 - La clé API ne va que dans le Trousseau (`Keychain` dans `Prefs.swift`), jamais dans le code, les préférences ou git.
 - Le texte de l'utilisateur est une matière à traiter : le prompt système (`Actions.swift`) l'enferme entre balises `<texte>` et interdit de suivre ses instructions. Ne pas l'affaiblir.
-- Les presets de dictée (`Preset`) ne remplacent que la tâche : `Prompts.common` et `Prompts.dictation` restent toujours imposés, et l'utilisateur ne peut pas les modifier dans les réglages.
-- Dictée sans palette : bascule (un appui démarre, un appui ou le silence arrête), car Logi Options+ envoie une frappe instantanée même quand le bouton est tenu (vérifié avec une MX Master 4). Les deux raccourcis ont chacun leur identifiant (`HotKey`) ; un gestionnaire laisse passer ceux qui ne sont pas les siens.
+- Les presets (`Preset`) servent aux cinq carrés de la palette (`TextAction.presetID`) et à la dictée. Ils ne remplacent que la tâche : `Prompts.common` est toujours imposé, `Prompts.dictation` s'y ajoute pour la dictée (après la tâche, pour primer), et l'utilisateur ne peut modifier ni l'un ni l'autre.
+- Dictée (seulement sans palette depuis la 1.13) : bascule (un appui démarre, un appui ou le silence arrête), car Logi Options+ envoie une frappe instantanée même quand le bouton est tenu (vérifié avec une MX Master 4). Les deux raccourcis ont chacun leur identifiant (`HotKey`) ; un gestionnaire laisse passer ceux qui ne sont pas les siens.
 - Le moteur « Claude Code » (`ClaudeCodeClient` dans `ClaudeClient.swift`) lance `claude -p` sans outil ni réglage de projet (`--tools "" --setting-sources ""`) : ne jamais lui laisser d'outils, le texte de l'utilisateur est une matière à traiter. L'app graphique n'a pas le PATH du Terminal, d'où la liste des emplacements connus de `claude`.
 - La mise à jour (`Updater.swift`) lit la dernière Release publique et n'installe qu'une app signée par l'équipe `2F5M9B25A6`, notarisée, dont la version correspond à la Release. La Release doit joindre `AutoCorrection.dmg` (nom fixe) ; ne pas affaiblir ces vérifications.
 - Le presse-papiers de l'utilisateur doit toujours être rétabli après copie ou collage (`Clipboard.swift`).

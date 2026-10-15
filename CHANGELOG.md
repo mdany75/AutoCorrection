@@ -1,5 +1,15 @@
 # Changements
 
+## 1.13 — 2026-10-15
+### Modifié
+- Palette : cinq carrés, les mêmes que les presets : Correction (↵), Personnel (⌃↵), Pro (⌘↵), TI (⇧⌘↵) et Courriel (⌥↵). Leur consigne se modifie dans les réglages (onglet Dictée) et sert aussi à la dictée sans palette.
+- Consigne Correction : corrige aussi les majuscules, sans reformuler (garde les mots, le ton et la structure).
+- Dictée : les consignes procèdent en deux étapes (nettoyer l'oral, puis appliquer la tâche), ce qui applique plus sûrement les reprises comme « non, je veux dire… ».
+- Note TI : n'écrit que les lignes dont le texte donne l'information.
+
+### Retiré
+- La dictée dans la palette (carré Dicter et touche Espace) : la dictée sans palette (⌃⌥⌘D) la remplace.
+
 ## 1.12 — 2026-10-15
 ### Ajouté
 - Dictée sans palette : un deuxième raccourci (⌃⌥⌘D par défaut, modifiable) lance l'écoute sans aucune fenêtre. Elle s'arrête par un nouvel appui ou, au choix, après un silence de 3, 5, 7 ou 10 secondes ; le texte s'écrit alors à l'emplacement du curseur. Esc annule. Prévu pour un bouton de souris réglé dans Logi Options+ (action « Raccourci clavier »).
