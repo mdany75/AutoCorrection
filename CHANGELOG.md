@@ -1,5 +1,15 @@
 # Changements
 
+## 1.15.2 — 2026-10-20
+### Modifié
+- Professionnel (palette et dictée) : un texte familier passe vraiment au registre professionnel. Majuscule au premier mot, mots familiers ou abrégés écrits en entier (« ordi », « synchro »), « pis » remplacé par « et » ou « puis », tournures orales écrites correctement, salutation familière remplacée (« hey » devient « Hi »). Le tutoiement ne devient jamais vouvoiement, et l'offre de suivi suit la personne du texte (« Dis-moi si tu as des questions. »).
+- Mesuré avec Haiku 5.5 en effort faible, ancienne consigne contre nouvelle :
+  - sur des textes familiers, 99 % des contrôles graves réussis (tutoiement, langue et faits gardés), contre 94 % avant ; registre relevé dans 85 % des cas, contre 77 % ;
+  - sur des textes d'allure IA, retrait des tics au moins aussi bon qu'avant (91 % contre 90 %) ;
+  - un texte anglais familier est beaucoup moins souvent traduit en français ;
+  - sur 16 textes neufs jugés à l'aveugle, l'ancienne consigne arrive dernière.
+- Limites connues : un texte anglais est encore parfois traduit en français, et un texte très chargé de tics d'IA est parfois rendu sans changement.
+
 ## 1.15.1 — 2026-10-20
 ### Modifié
 - Les styles s'appellent maintenant Orthographe, Personnel (l'ancien Humain), Professionnel (l'ancien Humain + Pro) et Courriel (l'ancien Humain + Courriel), dans la palette, le menu « Style de la dictée » et les réglages. Ils fonctionnent comme avant : Personnel, Professionnel et Courriel retirent toujours les tics d'écriture des IA. Le style de dictée choisi est conservé ; Personnel est le style par défaut.
