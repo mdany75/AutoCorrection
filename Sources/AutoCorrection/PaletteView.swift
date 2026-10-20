@@ -20,7 +20,7 @@ final class PaletteModel {
 
 enum PaletteLayout {
     static let width: CGFloat = 560
-    static let tile: CGFloat = 94
+    static let tile = CGSize(width: 118, height: 94)
     static let selectionFont = NSFont.systemFont(ofSize: 13)
     /// Largeur du texte : palette moins marges, icône et bouton de fermeture.
     static let textWidth: CGFloat = width - 28 - 20 - 10 - 25
@@ -106,11 +106,7 @@ struct PaletteView: View {
         case .idle:
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
-                    tile(.correct, key: .return, mods: [], main: true)
-                    tile(.personal, key: .return, mods: .control, main: false)
-                    tile(.polish, key: .return, mods: .command, main: false)
-                    tile(.human, key: .return, mods: [.shift, .command], main: false)
-                    tile(.email, key: .return, mods: .option, main: false)
+                    ForEach(TextAction.allCases) { tile($0, main: $0 == .spelling) }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 10)
@@ -144,7 +140,7 @@ struct PaletteView: View {
 
     private var footer: some View {
         HStack {
-            Text(editing ? "⇧↵ : saut de ligne  ·  Esc pour fermer" : "Esc pour fermer")
+            Text("Esc pour fermer")
             Spacer()
             Text(Prefs.replaceSelection ? "Le résultat remplace la sélection" : "Le résultat va dans le presse-papiers")
         }
@@ -155,25 +151,22 @@ struct PaletteView: View {
         .padding(.top, 2)
     }
 
-    private func tile(_ title: String, icon: String, shortcut: String, enabled: Bool, main: Bool,
+    private func tile(_ title: String, icon: String, enabled: Bool, main: Bool,
                       action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 5) {
+            VStack(spacing: 7) {
                 Image(systemName: icon).font(.system(size: 24))
                 Text(title).font(.system(size: 11, weight: .medium))
-                Text(shortcut).font(.system(size: 11)).opacity(0.6)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .buttonStyle(TileStyle(glass: style != "standard", main: main))
-        .frame(width: PaletteLayout.tile, height: PaletteLayout.tile)
+        .frame(width: PaletteLayout.tile.width, height: PaletteLayout.tile.height)
         .disabled(!enabled)
     }
 
-    private func tile(_ action: TextAction, key: KeyEquivalent, mods: EventModifiers, main: Bool) -> some View {
-        tile(action.shortTitle, icon: action.icon, shortcut: action.shortcutLabel,
-             enabled: !model.selection.isEmpty, main: main) { model.onRun(action) }
-            .keyboardShortcut(key, modifiers: mods)
+    private func tile(_ action: TextAction, main: Bool) -> some View {
+        tile(action.shortTitle, icon: action.icon, enabled: !model.selection.isEmpty, main: main) { model.onRun(action) }
     }
 }
 

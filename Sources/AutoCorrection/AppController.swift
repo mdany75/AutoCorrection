@@ -104,7 +104,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(withTitle: "Ouvrir la palette", action: #selector(menuOpenPalette), keyEquivalent: "").target = self
         presetMenu = NSMenu()
         presetMenu.delegate = self
-        menu.addItem(withTitle: "Traitement de la dictée", action: nil, keyEquivalent: "").submenu = presetMenu
+        menu.addItem(withTitle: "Style de la dictée", action: nil, keyEquivalent: "").submenu = presetMenu
         menu.addItem(.separator())
         menu.addItem(withTitle: "Réglages…", action: #selector(menuSettings), keyEquivalent: ",").target = self
         menu.addItem(.separator())
@@ -195,7 +195,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func menuOpenPalette() { Task { await togglePalette() } }
     @objc private func menuSettings() { openSettings() }
 
-    /// Sous-menu « Traitement de la dictée » : refait à chaque ouverture, les presets se modifient dans les réglages.
+    /// Sous-menu « Style de la dictée » : refait à chaque ouverture, les presets se modifient dans les réglages.
     func menuNeedsUpdate(_ menu: NSMenu) {
         guard menu === presetMenu else { return }
         menu.removeAllItems()
@@ -203,7 +203,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let label = menu.addItem(withTitle: "Raccourci : \(Prefs.hotKey(.dictation).label)", action: nil, keyEquivalent: "")
         label.isEnabled = false
         menu.addItem(.separator())
-        let choices = [(Preset.rawID, "Brut (sans IA)")] + Prefs.presets.map { ($0.id, $0.name) }
+        let choices = [(Preset.rawID, "Tel quel (sans IA)")] + Prefs.dictationPresets.map { ($0.id, $0.name) }
         for (id, name) in choices {
             let item = menu.addItem(withTitle: name, action: #selector(menuChoosePreset(_:)), keyEquivalent: "")
             item.target = self
@@ -360,8 +360,8 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
             var result = text
             var failure: String?
             let id = Prefs.dictationPresetID
-            if id != Preset.rawID, let preset = Prefs.presets.first(where: { $0.id == id }) {
-                do { result = try await ClaudeClient.run(system: preset.dictationPrompt(), on: text) }
+            if id != Preset.rawID, let preset = Prefs.dictationPresets.first(where: { $0.id == id }) {
+                do { result = try await ClaudeClient.run(system: preset.prompt(dictation: true), on: text) }
                 catch { failure = error.localizedDescription }
             }
             guard !Task.isCancelled else { return }

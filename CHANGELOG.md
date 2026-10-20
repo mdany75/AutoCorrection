@@ -1,6 +1,16 @@
 # Changements
 
 ## 1.15 — 2026-10-20
+### Modifié
+- Palette : quatre carrés, sans raccourci clavier : Orthographe, Humain, Humain + Pro et Humain + Courriel. Orthographe (l'ancien Correction) corrige les fautes sans reformuler ; elle ne sert plus à la dictée. Les trois autres retirent toujours les tics d'écriture des IA (règles du style humain) : seul, en ton professionnel, ou en courriel prêt à envoyer. Dans le texte modifiable de la palette, Entrée fait maintenant un saut de ligne.
+- Dictée : le menu « Style de la dictée » et les réglages proposent Tel quel (sans IA), Humain, Humain + Pro et Humain + Courriel ; Humain par défaut. Une dictée réglée sur un style retiré passe à Humain.
+- Humain + Pro : un texte anglais reste en anglais, et le contexte, le but d'une action, les intervalles (2019–2020) et les répliques de dialogue sont gardés.
+- Humain + Courriel : même une note ou une dictée devient un courriel complet qui commence par « Bonjour » ; une signature d'origine est remplacée par « Merci, » ; l'offre de suivi reste simple, sans « N'hésitez pas ».
+- Testé sur des textes neufs avec Haiku 5.5 en effort faible, à l'aveugle : Humain + Pro et Humain + Courriel font mieux que les anciens Pro et Courriel, avec moins de tics d'écriture des IA et sans traduire l'anglais. Le preset Humain garde la consigne de la 1.14.
+
+### Retiré
+- Les presets Personnel, Pro et Courriel seuls, remplacés par Humain + Pro et Humain + Courriel. Les presets personnalisés avant la 1.15 sont remplacés par ceux d'origine.
+
 ### Corrigé
 - Un texte sélectionné qui contenait lui-même les balises `</texte>` et `<texte>` pouvait sortir de son enveloppe et faire passer une fausse consigne pour une vraie (par exemple : traduire tout le texte en anglais). Ces balises perdent maintenant leur « < », remplacé par « ‹ », avant l'envoi à Claude, quelle que soit leur casse ou leurs espaces ; le reste du texte ne change pas. La même enveloppe sert à la clé API et à Claude Code.
 

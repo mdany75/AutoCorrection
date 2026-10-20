@@ -41,7 +41,7 @@ struct SettingsView: View {
     @AppStorage(Prefs.replaceKey) private var replace = true
     @AppStorage(Prefs.hideIconKey) private var hideIcon = false
     @AppStorage(Prefs.styleKey) private var style = "glass"
-    @AppStorage(Prefs.dictationPresetKey) private var dictationPreset = Preset.defaults[0].id
+    @AppStorage(Prefs.dictationPresetKey) private var dictationPreset = Preset.dictationDefaultID
     @AppStorage(Prefs.dictationSoundsKey) private var dictationSounds = true
     @AppStorage(Prefs.dictationSilenceKey) private var dictationSilence = 0
     @AppStorage(Prefs.dictationMaxKey) private var dictationMax = 2
@@ -156,9 +156,9 @@ struct SettingsView: View {
                 ShortcutRecorder("Raccourci de la dictée", kind: .dictation)
                 Text("Un appui lance l'écoute, sans fenêtre. Quand elle s'arrête, le texte s'écrit au curseur. Esc annule. Dans Logi Options+, assignez ce raccourci à un bouton de la souris (action « Raccourci clavier »).")
                     .font(.footnote).foregroundStyle(.secondary)
-                Picker("Traitement", selection: presetChoice) {
-                    Text("Brut (sans IA)").tag(Preset.rawID)
-                    ForEach(presets) { Text($0.name).tag($0.id) }
+                Picker("Style", selection: presetChoice) {
+                    Text("Tel quel (sans IA)").tag(Preset.rawID)
+                    ForEach(presets.filter(\.human)) { Text($0.name).tag($0.id) }
                 }
                 Picker("Arrêt de l'écoute", selection: $dictationSilence) {
                     Text("Nouvel appui sur le raccourci").tag(0)
@@ -189,7 +189,7 @@ struct SettingsView: View {
                     }
                 }
                 HStack {
-                    Text("Chaque preset sert à un carré de la palette et à la dictée.")
+                    Text("Chaque preset sert à un carré de la palette ; les trois presets humains servent aussi à la dictée. Humain + Pro et Humain + Courriel reçoivent toujours, en plus de leur consigne, les règles d'écriture humaine.")
                         .font(.footnote).foregroundStyle(.secondary)
                     Spacer()
                     Button("Rétablir les presets d'origine") {
@@ -204,11 +204,11 @@ struct SettingsView: View {
         .onChange(of: presets) { Prefs.savePresets(presets) }
     }
 
-    /// Un preset supprimé ou inconnu retombe sur le premier de la liste.
+    /// Un style retiré ou inconnu retombe sur le style par défaut.
     private var presetChoice: Binding<String> {
         Binding(get: {
-            dictationPreset == Preset.rawID || presets.contains { $0.id == dictationPreset }
-                ? dictationPreset : presets.first?.id ?? Preset.rawID
+            dictationPreset == Preset.rawID || presets.contains { $0.human && $0.id == dictationPreset }
+                ? dictationPreset : Preset.dictationDefaultID
         }, set: { dictationPreset = $0 })
     }
 

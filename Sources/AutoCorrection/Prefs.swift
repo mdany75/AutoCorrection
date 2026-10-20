@@ -43,13 +43,17 @@ enum Prefs {
     static let dictationSoundsKey = "dictationSounds"
     static let dictationSilenceKey = "dictationSilence"
     static let dictationMaxKey = "dictationMaxMinutes"
-    static let presetsKey = "dictationPresets"
+    /// Jusqu'à la 1.14, « dictationPresets » : des presets d'une autre forme, ignorés depuis.
+    static let presetsKey = "presets"
 
     /// Identifiant du preset appliqué au texte dicté, ou `Preset.rawID` pour l'écrire tel quel.
+    /// Un style retiré ou inconnu revient au style par défaut.
     static var dictationPresetID: String {
         let v = UserDefaults.standard.string(forKey: dictationPresetKey) ?? ""
-        return v == Preset.rawID || presets.contains { $0.id == v } ? v : Preset.defaults[0].id
+        return v == Preset.rawID || dictationPresets.contains { $0.id == v } ? v : Preset.dictationDefaultID
     }
+    /// Styles de la dictée, en plus de Tel quel : les presets humains.
+    static var dictationPresets: [Preset] { presets.filter(\.human) }
     static var dictationSounds: Bool {
         UserDefaults.standard.object(forKey: dictationSoundsKey) as? Bool ?? true
     }
@@ -65,13 +69,12 @@ enum Prefs {
         return v > 0 ? v : 2
     }
 
-    /// Presets de la dictée, modifiables dans les réglages ; ceux d'origine tant que rien n'est enregistré.
+    /// Presets de la palette et de la dictée, modifiables dans les réglages ; ceux d'origine tant que rien n'est enregistré.
     static var presets: [Preset] {
         guard let data = UserDefaults.standard.data(forKey: presetsKey),
               let list = try? JSONDecoder().decode([Preset].self, from: data), !list.isEmpty
         else { return Preset.defaults }
-        // La Note TI, enregistrée avant la 1.14, cède sa place au style humain.
-        return list.map { $0.id == "noteTI" ? Preset.defaults.first { $0.id == "humain" } ?? $0 : $0 }
+        return list
     }
     /// Les presets d'origine ne sont pas enregistrés : ils suivent ainsi les améliorations des versions suivantes.
     static func savePresets(_ list: [Preset]) {
