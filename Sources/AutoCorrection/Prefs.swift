@@ -52,7 +52,7 @@ enum Prefs {
         let v = UserDefaults.standard.string(forKey: dictationPresetKey) ?? ""
         return v == Preset.rawID || dictationPresets.contains { $0.id == v } ? v : Preset.dictationDefaultID
     }
-    /// Styles de la dictée, en plus de Tel quel : les presets humains.
+    /// Styles de la dictée, en plus de Tel quel : les presets humains (Personnel, Professionnel, Courriel).
     static var dictationPresets: [Preset] { presets.filter(\.human) }
     static var dictationSounds: Bool {
         UserDefaults.standard.object(forKey: dictationSoundsKey) as? Bool ?? true

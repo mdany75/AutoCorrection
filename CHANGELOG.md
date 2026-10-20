@@ -1,5 +1,9 @@
 # Changements
 
+## 1.15.1 — 2026-10-20
+### Modifié
+- Les styles s'appellent maintenant Orthographe, Personnel (l'ancien Humain), Professionnel (l'ancien Humain + Pro) et Courriel (l'ancien Humain + Courriel), dans la palette, le menu « Style de la dictée » et les réglages. Ils fonctionnent comme avant : Personnel, Professionnel et Courriel retirent toujours les tics d'écriture des IA. Le style de dictée choisi est conservé ; Personnel est le style par défaut.
+
 ## 1.15 — 2026-10-20
 ### Modifié
 - Palette : quatre carrés, sans raccourci clavier : Orthographe, Humain, Humain + Pro et Humain + Courriel. Orthographe (l'ancien Correction) corrige les fautes sans reformuler ; elle ne sert plus à la dictée. Les trois autres retirent toujours les tics d'écriture des IA (règles du style humain) : seul, en ton professionnel, ou en courriel prêt à envoyer. Dans le texte modifiable de la palette, Entrée fait maintenant un saut de ligne.

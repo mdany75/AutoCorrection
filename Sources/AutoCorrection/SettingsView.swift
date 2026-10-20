@@ -189,7 +189,7 @@ struct SettingsView: View {
                     }
                 }
                 HStack {
-                    Text("Chaque preset sert à un carré de la palette ; les trois presets humains servent aussi à la dictée. Humain + Pro et Humain + Courriel reçoivent toujours, en plus de leur consigne, les règles d'écriture humaine.")
+                    Text("Chaque preset sert à un carré de la palette ; Personnel, Professionnel et Courriel servent aussi à la dictée et retirent les tics d'écriture des IA. Professionnel et Courriel reçoivent toujours ces règles en plus de leur consigne.")
                         .font(.footnote).foregroundStyle(.secondary)
                     Spacer()
                     Button("Rétablir les presets d'origine") {
