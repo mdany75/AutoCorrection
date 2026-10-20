@@ -70,7 +70,8 @@ enum Prefs {
         guard let data = UserDefaults.standard.data(forKey: presetsKey),
               let list = try? JSONDecoder().decode([Preset].self, from: data), !list.isEmpty
         else { return Preset.defaults }
-        return list
+        // La Note TI, enregistrée avant la 1.14, cède sa place au style humain.
+        return list.map { $0.id == "noteTI" ? Preset.defaults.first { $0.id == "humain" } ?? $0 : $0 }
     }
     /// Les presets d'origine ne sont pas enregistrés : ils suivent ainsi les améliorations des versions suivantes.
     static func savePresets(_ list: [Preset]) {

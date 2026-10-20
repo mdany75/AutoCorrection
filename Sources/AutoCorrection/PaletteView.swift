@@ -109,7 +109,7 @@ struct PaletteView: View {
                     tile(.correct, key: .return, mods: [], main: true)
                     tile(.personal, key: .return, mods: .control, main: false)
                     tile(.polish, key: .return, mods: .command, main: false)
-                    tile(.ti, key: .return, mods: [.shift, .command], main: false)
+                    tile(.human, key: .return, mods: [.shift, .command], main: false)
                     tile(.email, key: .return, mods: .option, main: false)
                 }
                 .frame(maxWidth: .infinity)

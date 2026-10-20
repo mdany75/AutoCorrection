@@ -1,5 +1,12 @@
 # Changements
 
+## 1.14 — 2026-10-20
+### Modifié
+- Le carré TI (⇧⌘↵) devient Humain, avec le preset « Style humain » : il corrige les fautes et retire les tics d'écriture des IA pour que le texte ne sonne pas comme écrit par une IA. Sont visés les contrastes « ce n'est pas X, c'est Y », les questions mises en scène, les annonces, les chutes d'une ligne, les mots gonflés (« crucial », « incontournable »…), les tirets cadratins, le gras, les émojis et les formules toutes faites. Les faits, le tutoiement ou le vouvoiement et les expressions québécoises restent, et un texte déjà naturel change à peine. Le texte anglais est traité aussi, en anglais. Les règles viennent du skill humanizer (d'après « Signs of AI writing » de Wikipédia).
+
+### Retiré
+- Le preset Note TI. S'il avait été personnalisé dans les réglages, le style humain le remplace ; une dictée réglée sur la Note TI revient à Correction.
+
 ## 1.13.2 — 2026-10-15
 ### Corrigé
 - Dictée : juste après le retrait ou le branchement d'écouteurs, macOS peut encore désigner l'ancien micro pendant un instant (erreur 560227702). La dictée attend un moment et réessaie, au départ comme pendant l'écoute ; si le micro ne répond toujours pas, le message l'explique en français au lieu du seul code d'erreur.

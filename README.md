@@ -1,17 +1,17 @@
 # AutoCorrection
 
-Petite app Mac, dans la barre de menus, qui corrige ou réécrit (style personnel, professionnel, note TI, courriel) le texte sélectionné dans n'importe quelle app, ou le texte que vous dictez, grâce à Claude.
+Petite app Mac, dans la barre de menus, qui corrige ou réécrit (style personnel, professionnel, humain, courriel) le texte sélectionné dans n'importe quelle app, ou le texte que vous dictez, grâce à Claude.
 
 ![AutoCorrection](docs/capture.png)
 
 ## Fonctions
 
 - Raccourci global (⌥Espace par défaut, modifiable dans les réglages) qui ouvre une palette flottante sur le texte sélectionné.
-- Palette claire ou sombre selon le Mac, au style Liquid Glass (macOS 26) ou Standard au choix dans les réglages, avec cinq gros carrés : Correction (↵), Personnel (⌃↵, ton naturel et amical), Pro (⌘↵, corriger et rendre professionnel), TI (⇧⌘↵, note de billet de soutien) et Courriel (⌥↵, style professionnel standard, français québécois, sans signature).
+- Palette claire ou sombre selon le Mac, au style Liquid Glass (macOS 26) ou Standard au choix dans les réglages, avec cinq gros carrés : Correction (↵), Personnel (⌃↵, ton naturel et amical), Pro (⌘↵, corriger et rendre professionnel), Humain (⇧⌘↵, pour que le texte ne sonne pas comme écrit par une IA) et Courriel (⌥↵, style professionnel standard, français québécois, sans signature).
 - Le texte sélectionné s'affiche en entier et se modifie avant l'action (⇧↵ pour un saut de ligne) : la zone grandit jusqu'à 12 lignes, puis défile.
 - Dictée sans palette : un deuxième raccourci (⌃⌥⌘D par défaut) lance l'écoute (français) sans aucune fenêtre. Un nouvel appui l'arrête, ou un silence de 3, 5, 7 ou 10 secondes selon le réglage, puis le texte s'écrit à l'emplacement du curseur. Esc annule. Un son marque le début et la fin, et l'icône de la barre des menus devient un micro pendant l'écoute.
 - Avec une souris Logitech : dans Logi Options+, donnez à un bouton l'action « Raccourci clavier » ⌃⌥⌘D. Options+ envoie une frappe instantanée, pas un maintien : c'est pourquoi la dictée se lance et s'arrête par deux appuis plutôt qu'en tenant le bouton.
-- Presets : Correction, Style personnel, Style professionnel, Note TI et Courriel. Chacun sert à un carré de la palette et au traitement de la dictée, qui peut aussi être Brut (texte reconnu tel quel, sans IA). Nom et consigne modifiables dans l'onglet Dictée des réglages ; choix du traitement de la dictée aussi dans le menu « Traitement de la dictée ».
+- Presets : Correction, Style personnel, Style professionnel, Style humain et Courriel. Chacun sert à un carré de la palette et au traitement de la dictée, qui peut aussi être Brut (texte reconnu tel quel, sans IA). Nom et consigne modifiables dans l'onglet Dictée des réglages ; choix du traitement de la dictée aussi dans le menu « Traitement de la dictée ».
 - Réglages en deux onglets. Général : moteur, raccourci de la palette, ouverture au démarrage du Mac, option pour cacher l'icône de la barre des menus (rouvrir l'app ouvre les réglages). Dictée : raccourci, traitement, arrêt de l'écoute, sons, durée maximale, presets.
 - Menu « Rechercher les mises à jour… » : installe la dernière version publiée sur GitHub, après vérification de la signature.
 - La palette se ferme avec le bouton ×, par un clic en dehors, ou avec Esc.

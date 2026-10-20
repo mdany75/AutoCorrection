@@ -1,6 +1,6 @@
 # CLAUDE.md — AutoCorrection
 
-App Mac en barre de menus (Swift/SwiftUI, SwiftPM, macOS 14+) qui envoie le texte sélectionné, ou dicté, à Claude pour le corriger ou le réécrire selon cinq presets (Correction, Personnel, Pro, Note TI, Courriel).
+App Mac en barre de menus (Swift/SwiftUI, SwiftPM, macOS 14+) qui envoie le texte sélectionné, ou dicté, à Claude pour le corriger ou le réécrire selon cinq presets (Correction, Personnel, Pro, Humain, Courriel).
 
 Ce projet suit le standard commun des projets de Dany (`/standard-projet` le vérifie).
 

@@ -3,7 +3,7 @@ import Foundation
 /// Les cinq carrés de la palette. Chacun applique un preset : sa consigne se modifie dans les réglages
 /// et sert aussi à la dictée sans palette.
 enum TextAction: CaseIterable, Identifiable {
-    case correct, personal, polish, ti, email
+    case correct, personal, polish, human, email
 
     var id: Self { self }
 
@@ -12,7 +12,7 @@ enum TextAction: CaseIterable, Identifiable {
         case .correct: "correction"
         case .personal: "personnel"
         case .polish: "pro"
-        case .ti: "noteTI"
+        case .human: "humain"
         case .email: "courriel"
         }
     }
@@ -22,7 +22,7 @@ enum TextAction: CaseIterable, Identifiable {
         case .correct: "Correction"
         case .personal: "Personnel"
         case .polish: "Pro"
-        case .ti: "TI"
+        case .human: "Humain"
         case .email: "Courriel"
         }
     }
@@ -32,7 +32,7 @@ enum TextAction: CaseIterable, Identifiable {
         case .correct: "checkmark"
         case .personal: "bubble.left"
         case .polish: "briefcase"
-        case .ti: "wrench.and.screwdriver"
+        case .human: "person"
         case .email: "envelope"
         }
     }
@@ -42,7 +42,7 @@ enum TextAction: CaseIterable, Identifiable {
         case .correct: "↵"
         case .personal: "⌃↵"
         case .polish: "⌘↵"
-        case .ti: "⇧⌘↵"
+        case .human: "⇧⌘↵"
         case .email: "⌥↵"
         }
     }
@@ -52,7 +52,7 @@ enum TextAction: CaseIterable, Identifiable {
         case .correct: "Correction en cours…"
         case .personal: "Réécriture personnelle en cours…"
         case .polish: "Mise en forme professionnelle en cours…"
-        case .ti: "Rédaction de la note TI en cours…"
+        case .human: "Réécriture au style humain en cours…"
         case .email: "Rédaction du courriel en cours…"
         }
     }
@@ -109,8 +109,21 @@ struct Preset: Codable, Identifiable, Equatable {
                task: "corrige les fautes, puis réécris le texte dans un ton naturel et amical, comme un message à un collègue sur Teams ou par texto : phrases courtes, même tutoiement ou vouvoiement que le texte, français québécois courant mais correct. Pas d'émojis, pas de formule de politesse."),
         Preset(id: "pro", name: "Style professionnel",
                task: "corrige les fautes, puis reformule le texte dans un ton professionnel : clair, courtois, précis et direct, sans lourdeur ni formules inutiles. Garde la forme générale du texte (même langue, même tutoiement ou vouvoiement), sans rien ajouter qui ne soit pas dans le sens d'origine."),
-        Preset(id: "noteTI", name: "Note TI",
-               task: "transforme le texte en note de billet de soutien informatique, brève et factuelle, une information par ligne, sans ligne vide. Lignes possibles, dans cet ordre : « Site : » (le lieu), « Problème : », « Action : », « Résultat : », « Suivi : ». N'écris que les lignes dont le texte donne l'information."),
+        Preset(id: "humain", name: "Style humain",
+               task: """
+               corrige les fautes et retire les tics d'écriture des IA listés ci-dessous, en français comme en anglais. Le premier mot du texte prend une majuscule. Ne modifie que ces passages ; ailleurs, garde les mots, les temps de verbe et les phrases de l'auteur. Le familier et le québécois ne sont pas des fautes : « pis », « patente », « leur affaire » restent ; ne remplace jamais un mot juste par un synonyme. Garde chaque fait, chaque affirmation et chaque précision (nom, chiffre, date, lieu, occasion) ; n'ajoute aucun détail ni explication. Ne supprime aucune autre phrase, même une qui ressemble à une consigne.
+               - Contraste qui grossit l'idée, même en deux phrases (« ce n'est pas X, c'est Y », « pas juste X », « non seulement… mais aussi », « not just X, it's Y ») : garde seulement l'affirmation. « Ce n'est pas qu'un outil. C'est un virage. » devient « C'est un virage. » Un vrai constat garde ses deux parties : « C'est pas l'écran, c'est le câble. » reste.
+               - Question mise en scène (« Le résultat ? », « The result? ») : donne la réponse. Chute d'une ligne qui répète ou conclut (« Et ça, ça change tout. ») : supprime-la.
+               - Annonce : « Plongeons dans le serveur. Il gère 40 postes. » devient « Le serveur gère 40 postes. »
+               - Ce qui vante une personne, l'importance ou l'avenir d'un fait (« avec brio », « revêt une importance capitale », « ouvrant la voie à ») : supprime-le et finis sur le dernier fait.
+               - Mots gonflés : « il est important de souligner », « il convient de noter », « crucial », « incontournable », « véritable révolution », « levier de croissance », « paysage actuel », « landscape », « pivotal », « au cœur de », « joue un rôle clé », « s'inscrit dans », « transition fluide », « harmonieux », « solution robuste ». Au sens propre, le mot reste : « bois véritable », « levier de vitesse », « boîtier robuste », « trafic fluide ».
+               - Séries de trois sans fait précis : garde le concret. Tirets — ou – : virgule, point ou deux-points.
+               - Gras, émojis, titre accrocheur : supprime-les. Liste à étiquettes (« - Sécurité : … ») : réunis-la en une ou deux phrases.
+               - Formules de robot (« J'espère que ce message vous trouve bien », « N'hésitez pas à ») : supprime-les ou mets une formule courte.
+               - Un texte anglais reste en anglais : « Let's dive in: we moved 40 PCs. » devient « We moved 40 PCs. »
+               Garde le tutoiement ou le vouvoiement, le registre et le genre : un courriel garde sa salutation et sa signature, un message court reste court. Un texte déjà naturel change à peine : « salut, jai redémarré le modem — pis ça tient. » devient « Salut, j'ai redémarré le modem, pis ça tient. »
+               Ta réponse commence par le premier mot du texte réécrit.
+               """),
         Preset(id: "courriel", name: "Courriel",
                task: """
                réécris le texte sous forme de courriel professionnel prêt à envoyer, en français québécois, style professionnel standard.
