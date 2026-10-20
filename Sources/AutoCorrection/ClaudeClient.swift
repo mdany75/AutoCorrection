@@ -19,6 +19,15 @@ enum ClaudeError: LocalizedError {
 }
 
 enum ClaudeClient {
+    /// Enveloppe le texte de l'utilisateur entre balises <texte>, pour les deux moteurs. Une balise <texte> ou </texte>
+    /// déjà présente dans le texte (toute casse, espaces compris) voit son « < » remplacé par « ‹ » : elle ne peut plus
+    /// fermer l'enveloppe pour y glisser une fausse consigne. Le reste du texte ne change pas.
+    static func envelope(_ text: String) -> String {
+        let safe = text.replacingOccurrences(of: #"<(?=\s*/?\s*texte\b)"#, with: "‹",
+                                             options: [.regularExpression, .caseInsensitive])
+        return "<texte>\n\(safe)\n</texte>"
+    }
+
     static func run(_ action: TextAction, on text: String) async throws -> String {
         try await run(system: action.systemPrompt(), on: text)
     }
@@ -39,7 +48,7 @@ enum ClaudeClient {
             "max_tokens": 4096,
             "output_config": ["effort": Prefs.effort],
             "system": system,
-            "messages": [["role": "user", "content": "<texte>\n\(text)\n</texte>"]]
+            "messages": [["role": "user", "content": envelope(text)]]
         ]
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
 
@@ -75,7 +84,7 @@ enum ClaudeCodeClient {
                     "--system-prompt", system,
                     "--no-session-persistence", "--disable-slash-commands",
                     "--setting-sources", "", "--strict-mcp-config"]
-        let input = "<texte>\n\(text)\n</texte>"
+        let input = ClaudeClient.envelope(text)
         let (status, out, err) = try await execute(exe, args, input: input, timeout: 90)
 
         let result = out.trimmingCharacters(in: .whitespacesAndNewlines)

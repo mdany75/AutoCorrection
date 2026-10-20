@@ -1,5 +1,9 @@
 # Changements
 
+## 1.14.1 — 2026-10-20
+### Corrigé
+- Un texte sélectionné qui contenait lui-même les balises `</texte>` et `<texte>` pouvait sortir de son enveloppe et faire passer une fausse consigne pour une vraie (par exemple : traduire tout le texte en anglais). Ces balises perdent maintenant leur « < », remplacé par « ‹ », avant l'envoi à Claude, quelle que soit leur casse ou leurs espaces ; le reste du texte ne change pas. La même enveloppe sert à la clé API et à Claude Code.
+
 ## 1.13.2 — 2026-10-15
 ### Corrigé
 - Dictée : juste après le retrait ou le branchement d'écouteurs, macOS peut encore désigner l'ancien micro pendant un instant (erreur 560227702). La dictée attend un moment et réessaie, au départ comme pendant l'écoute ; si le micro ne répond toujours pas, le message l'explique en français au lieu du seul code d'erreur.
