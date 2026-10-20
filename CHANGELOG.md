@@ -1,5 +1,9 @@
 # Changements
 
+## 1.15 — 2026-10-20
+### Corrigé
+- Un texte sélectionné qui contenait lui-même les balises `</texte>` et `<texte>` pouvait sortir de son enveloppe et faire passer une fausse consigne pour une vraie (par exemple : traduire tout le texte en anglais). Ces balises perdent maintenant leur « < », remplacé par « ‹ », avant l'envoi à Claude, quelle que soit leur casse ou leurs espaces ; le reste du texte ne change pas. La même enveloppe sert à la clé API et à Claude Code.
+
 ## 1.14 — 2026-10-20
 ### Modifié
 - Le carré TI (⇧⌘↵) devient Humain, avec le preset « Style humain » : il corrige les fautes et retire les tics d'écriture des IA pour que le texte ne sonne pas comme écrit par une IA. Sont visés les contrastes « ce n'est pas X, c'est Y », les questions mises en scène, les annonces, les chutes d'une ligne, les mots gonflés (« crucial », « incontournable »…), les tirets cadratins, le gras, les émojis et les formules toutes faites. Les faits, le tutoiement ou le vouvoiement et les expressions québécoises restent, et un texte déjà naturel change à peine. Le texte anglais est traité aussi, en anglais. Les règles viennent du skill humanizer (d'après « Signs of AI writing » de Wikipédia).
