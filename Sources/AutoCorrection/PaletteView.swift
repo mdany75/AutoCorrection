@@ -80,7 +80,7 @@ struct PaletteView: View {
                 .foregroundStyle(.tint)
                 .padding(.top, 2)
             if model.selection.isEmpty {
-                Text("Aucun texte sélectionné. Sélectionnez du texte, ou dictez-le avec \(Prefs.hotKey(.dictation).label).")
+                Text("Aucun texte sélectionné. Sélectionnez du texte, puis rouvrez la palette avec \(Prefs.hotKey().label).")
                     .foregroundStyle(.secondary)
             } else {
                 SelectionText(model: model, focused: $editing)

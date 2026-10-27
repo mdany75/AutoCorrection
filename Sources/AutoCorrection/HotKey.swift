@@ -40,13 +40,8 @@ final class HotKey {
     }
 }
 
-/// Les deux raccourcis globaux de l'app : la palette et la dictée sans palette.
-enum HotKeyKind {
-    case palette, dictation
-}
-
 @MainActor
 enum HotKeyCenter {
-    /// Branchée par AppController : enregistre le raccourci et renvoie false s'il est déjà pris.
-    static var apply: (HotKeyKind, Int, Int) -> Bool = { _, _, _ in true }
+    /// Branchée par AppController : enregistre le raccourci de la palette et renvoie false s'il est déjà pris.
+    static var apply: (Int, Int) -> Bool = { _, _ in true }
 }

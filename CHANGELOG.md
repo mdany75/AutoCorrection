@@ -1,5 +1,12 @@
 # Changements
 
+## 1.16 — 2026-10-27
+### Retiré
+- La dictée : le raccourci ⌃⌥⌘D, le menu « Style de la dictée », l'onglet Dictée des réglages, les sons et l'icône micro de la barre des menus. La dictée de macOS fait la même chose : dicter, puis sélectionner le texte et ouvrir la palette. L'app ne demande plus l'accès au micro ni à la reconnaissance vocale.
+
+### Modifié
+- Réglages : l'éditeur des presets a son propre onglet, Presets.
+
 ## 1.15.2 — 2026-10-20
 ### Modifié
 - Professionnel (palette et dictée) : un texte familier passe vraiment au registre professionnel. Majuscule au premier mot, mots familiers ou abrégés écrits en entier (« ordi », « synchro »), « pis » remplacé par « et » ou « puis », tournures orales écrites correctement, salutation familière remplacée (« hey » devient « Hi »). Le tutoiement ne devient jamais vouvoiement, et l'offre de suivi suit la personne du texte (« Dis-moi si tu as des questions. »).

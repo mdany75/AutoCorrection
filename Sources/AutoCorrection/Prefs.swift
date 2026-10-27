@@ -9,67 +9,28 @@ enum Prefs {
     /// Rayon des coins de la palette selon le style (« standard » ou « glass »).
     static func paletteRadius(_ style: String) -> CGFloat { style == "standard" ? 14 : 30 }
 
-    /// Clés des préférences d'un raccourci (code, modificateurs, libellé).
-    private static func hotKeyKeys(_ kind: HotKeyKind) -> [String] {
-        switch kind {
-        case .palette: ["hotKeyCode", "hotKeyMods", "hotKeyLabel"]
-        case .dictation: ["dictationHotKeyCode", "dictationHotKeyMods", "dictationHotKeyLabel"]
-        }
-    }
+    /// Raccourci de la palette (code, modificateurs, libellé).
+    private static let hotKeyKeys = ["hotKeyCode", "hotKeyMods", "hotKeyLabel"]
+    static let defaultHotKey = (code: 49, mods: 2048, label: "⌥Espace") // kVK_Space, optionKey
 
-    static func defaultHotKey(_ kind: HotKeyKind) -> (code: Int, mods: Int, label: String) {
-        switch kind {
-        case .palette: (49, 2048, "⌥Espace") // kVK_Space, optionKey
-        case .dictation: (2, 6400, "⌃⌥⌘D") // kVK_ANSI_D, controlKey | optionKey | cmdKey
-        }
-    }
-
-    static func hotKey(_ kind: HotKeyKind) -> (code: Int, mods: Int, label: String) {
-        let d = UserDefaults.standard, k = hotKeyKeys(kind)
-        guard d.object(forKey: k[0]) != nil else { return defaultHotKey(kind) }
+    static func hotKey() -> (code: Int, mods: Int, label: String) {
+        let d = UserDefaults.standard, k = hotKeyKeys
+        guard d.object(forKey: k[0]) != nil else { return defaultHotKey }
         return (d.integer(forKey: k[0]), d.integer(forKey: k[1]), d.string(forKey: k[2]) ?? "")
     }
-    static func saveHotKey(_ kind: HotKeyKind, code: Int, mods: Int, label: String) {
-        let d = UserDefaults.standard, k = hotKeyKeys(kind)
+    static func saveHotKey(code: Int, mods: Int, label: String) {
+        let d = UserDefaults.standard, k = hotKeyKeys
         d.set(code, forKey: k[0]); d.set(mods, forKey: k[1]); d.set(label, forKey: k[2])
     }
-    static func resetHotKey(_ kind: HotKeyKind) {
+    static func resetHotKey() {
         let d = UserDefaults.standard
-        hotKeyKeys(kind).forEach { d.removeObject(forKey: $0) }
+        hotKeyKeys.forEach { d.removeObject(forKey: $0) }
     }
 
-    // Dictée sans palette
-    static let dictationPresetKey = "dictationPreset"
-    static let dictationSoundsKey = "dictationSounds"
-    static let dictationSilenceKey = "dictationSilence"
-    static let dictationMaxKey = "dictationMaxMinutes"
     /// Jusqu'à la 1.14, « dictationPresets » : des presets d'une autre forme, ignorés depuis.
     static let presetsKey = "presets"
 
-    /// Identifiant du preset appliqué au texte dicté, ou `Preset.rawID` pour l'écrire tel quel.
-    /// Un style retiré ou inconnu revient au style par défaut.
-    static var dictationPresetID: String {
-        let v = UserDefaults.standard.string(forKey: dictationPresetKey) ?? ""
-        return v == Preset.rawID || dictationPresets.contains { $0.id == v } ? v : Preset.dictationDefaultID
-    }
-    /// Styles de la dictée, en plus de Tel quel : les presets humains (Personnel, Professionnel, Courriel).
-    static var dictationPresets: [Preset] { presets.filter(\.human) }
-    static var dictationSounds: Bool {
-        UserDefaults.standard.object(forKey: dictationSoundsKey) as? Bool ?? true
-    }
-    /// Durées de silence proposées pour arrêter l'écoute, en secondes.
-    static let dictationSilences = [3, 5, 7, 10]
-    /// Secondes de silence avant l'arrêt automatique ; 0 : seulement par un nouvel appui sur le raccourci.
-    static var dictationSilence: Int {
-        let v = UserDefaults.standard.integer(forKey: dictationSilenceKey)
-        return dictationSilences.contains(v) ? v : 0
-    }
-    static var dictationMaxMinutes: Int {
-        let v = UserDefaults.standard.integer(forKey: dictationMaxKey)
-        return v > 0 ? v : 2
-    }
-
-    /// Presets de la palette et de la dictée, modifiables dans les réglages ; ceux d'origine tant que rien n'est enregistré.
+    /// Presets de la palette, modifiables dans les réglages ; ceux d'origine tant que rien n'est enregistré.
     static var presets: [Preset] {
         guard let data = UserDefaults.standard.data(forKey: presetsKey),
               let list = try? JSONDecoder().decode([Preset].self, from: data), !list.isEmpty

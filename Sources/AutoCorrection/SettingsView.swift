@@ -41,10 +41,6 @@ struct SettingsView: View {
     @AppStorage(Prefs.replaceKey) private var replace = true
     @AppStorage(Prefs.hideIconKey) private var hideIcon = false
     @AppStorage(Prefs.styleKey) private var style = "glass"
-    @AppStorage(Prefs.dictationPresetKey) private var dictationPreset = Preset.dictationDefaultID
-    @AppStorage(Prefs.dictationSoundsKey) private var dictationSounds = true
-    @AppStorage(Prefs.dictationSilenceKey) private var dictationSilence = 0
-    @AppStorage(Prefs.dictationMaxKey) private var dictationMax = 2
     @State private var presets = Prefs.presets
     @State private var editedPreset = Preset.defaults[0].id
     @StateObject private var state = SettingsState()
@@ -52,7 +48,7 @@ struct SettingsView: View {
     var body: some View {
         TabView {
             general.tabItem { Label("Général", systemImage: "gearshape") }
-            dictationSettings.tabItem { Label("Dictée", systemImage: "mic") }
+            presetSettings.tabItem { Label("Presets", systemImage: "square.grid.2x2") }
         }
         .task(id: backend) { if backend == "claudeCode" { await state.refreshLogin() } }
         .frame(width: 460)
@@ -116,7 +112,7 @@ struct SettingsView: View {
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Section("Comportement") {
-                ShortcutRecorder("Raccourci de la palette", kind: .palette)
+                ShortcutRecorder("Raccourci de la palette")
                 Picker("Style de la palette", selection: $style) {
                     Text("Liquid Glass").tag("glass")
                     Text("Standard").tag("standard")
@@ -129,7 +125,7 @@ struct SettingsView: View {
                 }
                 Toggle("Cacher l'icône de la barre des menus", isOn: $hideIcon)
                 if hideIcon {
-                    Text("Les raccourcis restent actifs. Pour retrouver ces réglages, rouvrez AutoCorrection depuis Applications ou Spotlight.")
+                    Text("Le raccourci reste actif. Pour retrouver ces réglages, rouvrez AutoCorrection depuis Applications ou Spotlight.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
             }
@@ -150,32 +146,9 @@ struct SettingsView: View {
         .formStyle(.grouped)
     }
 
-    private var dictationSettings: some View {
+    private var presetSettings: some View {
         Form {
-            Section("Dictée sans palette") {
-                ShortcutRecorder("Raccourci de la dictée", kind: .dictation)
-                Text("Un appui lance l'écoute, sans fenêtre. Quand elle s'arrête, le texte s'écrit au curseur. Esc annule. Dans Logi Options+, assignez ce raccourci à un bouton de la souris (action « Raccourci clavier »).")
-                    .font(.footnote).foregroundStyle(.secondary)
-                Picker("Style", selection: presetChoice) {
-                    Text("Tel quel (sans IA)").tag(Preset.rawID)
-                    ForEach(presets.filter(\.human)) { Text($0.name).tag($0.id) }
-                }
-                Picker("Arrêt de l'écoute", selection: $dictationSilence) {
-                    Text("Nouvel appui sur le raccourci").tag(0)
-                    ForEach(Prefs.dictationSilences, id: \.self) { Text("Silence de \($0) secondes").tag($0) }
-                }
-                if dictationSilence > 0 {
-                    Text("Un nouvel appui arrête aussi l'écoute avant la fin du silence.")
-                        .font(.footnote).foregroundStyle(.secondary)
-                }
-                Toggle("Sons de début et de fin", isOn: $dictationSounds)
-                Picker("Durée maximale", selection: $dictationMax) {
-                    Text("1 minute").tag(1)
-                    Text("2 minutes").tag(2)
-                    Text("5 minutes").tag(5)
-                }
-            }
-            Section("Presets de la palette et de la dictée") {
+            Section("Presets de la palette") {
                 Picker("Preset à modifier", selection: $editedPreset) {
                     ForEach(presets) { Text($0.name.isEmpty ? "Sans nom" : $0.name).tag($0.id) }
                 }
@@ -189,7 +162,7 @@ struct SettingsView: View {
                     }
                 }
                 HStack {
-                    Text("Chaque preset sert à un carré de la palette ; Personnel, Professionnel et Courriel servent aussi à la dictée et retirent les tics d'écriture des IA. Professionnel et Courriel reçoivent toujours ces règles en plus de leur consigne.")
+                    Text("Chaque preset sert à un carré de la palette. Personnel, Professionnel et Courriel retirent les tics d'écriture des IA ; Professionnel et Courriel reçoivent toujours ces règles en plus de leur consigne.")
                         .font(.footnote).foregroundStyle(.secondary)
                     Spacer()
                     Button("Rétablir les presets d'origine") {
@@ -202,14 +175,6 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .onChange(of: presets) { Prefs.savePresets(presets) }
-    }
-
-    /// Un style retiré ou inconnu retombe sur le style par défaut.
-    private var presetChoice: Binding<String> {
-        Binding(get: {
-            dictationPreset == Preset.rawID || presets.contains { $0.human && $0.id == dictationPreset }
-                ? dictationPreset : Preset.dictationDefaultID
-        }, set: { dictationPreset = $0 })
     }
 
     private var modelChoice: Binding<String> {

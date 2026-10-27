@@ -16,12 +16,11 @@
 set -euo pipefail
 
 APP_NAME="AutoCorrection"
-VERSION="1.15.2"
+VERSION="1.16"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 DIST_DIR="${ROOT_DIR}/build"
 ICON_FILE="${ROOT_DIR}/Resources/AppIcon.icns"
-ENTITLEMENTS="${ROOT_DIR}/Resources/AutoCorrection.entitlements"
 
 INSTALL=0
 for arg in "$@"; do
@@ -38,7 +37,6 @@ STAGE_DIR=""
 trap '[[ -z "${STAGE_DIR}" ]] || rm -rf "${STAGE_DIR}"' EXIT
 
 [[ -f "${ICON_FILE}" ]] || die "fichier manquant : ${ICON_FILE}"
-[[ -f "${ENTITLEMENTS}" ]] || die "fichier manquant : ${ENTITLEMENTS}"
 for tool in swift codesign plutil hdiutil ditto security xcrun spctl; do
     command -v "${tool}" >/dev/null 2>&1 || die "outil introuvable : ${tool}"
 done
@@ -50,13 +48,13 @@ SIGN_IDENTITY="${SIGN_IDENTITY:-$(security find-identity -v -p codesigning 2>/de
 SIGN_IDENTITY="${SIGN_IDENTITY:--}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-notarisation}"
 if [[ "${SIGN_IDENTITY}" == "-" ]]; then
-    SIGN_ARGS=(--entitlements "${ENTITLEMENTS}" --sign -)
+    SIGN_ARGS=(--sign -)
     NOTARIZE=0; NOTARIZE_WHY="signature ad hoc, aucun certificat Developer ID"
 elif [[ "${SKIP_NOTARIZE:-0}" != "0" ]]; then
-    SIGN_ARGS=(--options runtime --timestamp --entitlements "${ENTITLEMENTS}" --sign "${SIGN_IDENTITY}")
+    SIGN_ARGS=(--options runtime --timestamp --sign "${SIGN_IDENTITY}")
     NOTARIZE=0; NOTARIZE_WHY="SKIP_NOTARIZE=1"
 else
-    SIGN_ARGS=(--options runtime --timestamp --entitlements "${ENTITLEMENTS}" --sign "${SIGN_IDENTITY}")
+    SIGN_ARGS=(--options runtime --timestamp --sign "${SIGN_IDENTITY}")
     NOTARIZE=1; NOTARIZE_WHY=""
 fi
 
@@ -134,8 +132,6 @@ cat > "${STAGE_APP}/Contents/Info.plist" <<PLIST
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
-  <key>NSMicrophoneUsageDescription</key><string>AutoCorrection utilise le microphone pour dicter un texte.</string>
-  <key>NSSpeechRecognitionUsageDescription</key><string>AutoCorrection transcrit votre voix en texte pour la dictée.</string>
 </dict>
 </plist>
 PLIST

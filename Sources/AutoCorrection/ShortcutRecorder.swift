@@ -4,15 +4,13 @@ import SwiftUI
 
 @MainActor
 final class ShortcutRecorderState: ObservableObject {
-    let kind: HotKeyKind
     @Published var label: String
     @Published var recording = false
     @Published var message: String?
     private var monitor: Any?
 
-    init(kind: HotKeyKind) {
-        self.kind = kind
-        label = Prefs.hotKey(kind).label
+    init() {
+        label = Prefs.hotKey().label
     }
 
     func start() {
@@ -34,9 +32,9 @@ final class ShortcutRecorderState: ObservableObject {
 
     func reset() {
         stop()
-        let d = Prefs.defaultHotKey(kind)
-        if HotKeyCenter.apply(kind, d.code, d.mods) {
-            Prefs.resetHotKey(kind)
+        let d = Prefs.defaultHotKey
+        if HotKeyCenter.apply(d.code, d.mods) {
+            Prefs.resetHotKey()
             label = d.label
             message = nil
         } else {
@@ -61,8 +59,8 @@ final class ShortcutRecorderState: ObservableObject {
         let code = Int(event.keyCode)
         let text = Self.symbols(for: f) + Self.keyName(for: event)
         stop()
-        if HotKeyCenter.apply(kind, code, mods) {
-            Prefs.saveHotKey(kind, code: code, mods: mods, label: text)
+        if HotKeyCenter.apply(code, mods) {
+            Prefs.saveHotKey(code: code, mods: mods, label: text)
             label = text
             message = nil
         } else {
@@ -97,9 +95,9 @@ struct ShortcutRecorder: View {
     let title: String
     @StateObject private var state: ShortcutRecorderState
 
-    init(_ title: String, kind: HotKeyKind) {
+    init(_ title: String) {
         self.title = title
-        _state = StateObject(wrappedValue: ShortcutRecorderState(kind: kind))
+        _state = StateObject(wrappedValue: ShortcutRecorderState())
     }
 
     var body: some View {
@@ -110,8 +108,8 @@ struct ShortcutRecorder: View {
                 Button(state.recording ? "Tapez le raccourci… (Esc pour annuler)" : state.label) {
                     state.recording ? state.stop() : state.start()
                 }
-                Button("Rétablir \(Prefs.defaultHotKey(state.kind).label)") { state.reset() }
-                    .disabled(!state.recording && state.label == Prefs.defaultHotKey(state.kind).label)
+                Button("Rétablir \(Prefs.defaultHotKey.label)") { state.reset() }
+                    .disabled(!state.recording && state.label == Prefs.defaultHotKey.label)
             }
             if let m = state.message {
                 Text(m).font(.footnote).foregroundStyle(.red)
